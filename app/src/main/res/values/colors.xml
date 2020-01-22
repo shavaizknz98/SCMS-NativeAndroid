@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <color name="colorPrimary">#17223B</color>
+    <color name="colorPrimaryDark">#17223B</color>
+    <color name="navigationBarColor">#17223B</color>
+
+    <color name="colorPageBackground">#26385F</color>
+<color name="white">#FFFFFF</color>
+    <color name="colorAccent">#26385F</color>
+    <color name="buttonColor">#C38FFF</color>
+
+    <color name="primary">#17223B</color>
+    <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">#fff</color>
+
+</resources>
