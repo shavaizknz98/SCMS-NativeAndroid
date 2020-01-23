@@ -74,8 +74,8 @@ public class LoginTab extends Fragment {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent toBookingActivity = new Intent(getActivity(), BookingActivity.class);
-                startActivity(toBookingActivity);
+                Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
+                startActivity(toNavigationActivity);
                 getActivity().finish();
             }
         });
