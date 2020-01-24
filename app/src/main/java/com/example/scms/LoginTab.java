@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.google.android.material.textfield.TextInputLayout;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -33,6 +35,7 @@ public class LoginTab extends Fragment {
     private String mParam1;
     private String mParam2;
     private Button loginButton;
+    private TextInputLayout loginLayout;
 
     private OnFragmentInteractionListener mListener;
 
@@ -71,6 +74,7 @@ public class LoginTab extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         loginButton = view.findViewById(R.id.logInButton);
+        loginLayout = view.findViewById(R.id.emailAddrEditText);
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

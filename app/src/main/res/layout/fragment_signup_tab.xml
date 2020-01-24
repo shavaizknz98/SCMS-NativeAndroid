@@ -19,6 +19,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/white"
             android:orientation="vertical">
 
             <com.google.android.material.textfield.TextInputLayout
@@ -30,10 +31,11 @@
                 android:layout_marginTop="30dp"
                 android:gravity="center_horizontal"
                 android:hint="Email Address"
-                android:textColorHint="#FFFFFF"
+                android:textColorHint="@color/white"
                 app:boxBackgroundColor="#00FFFFFF"
                 app:boxStrokeColor="#FFFFFF"
-                app:boxStrokeWidth="20dp">
+                app:boxStrokeWidth="2dp"
+                app:hintTextColor="@color/buttonColor">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/emailAddrEditText"
@@ -54,10 +56,11 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="40dp"
                 android:hint="Phone Number"
-                android:textColorHint="#FFFFFF"
+                android:textColorHint="@color/white"
                 app:boxBackgroundColor="#00FFFFFF"
                 app:boxStrokeColor="#FFFFFF"
-                app:boxStrokeWidth="20dp">
+                app:boxStrokeWidth="2dp"
+                app:hintTextColor="@color/buttonColor">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/phoneNumberEditText"
@@ -77,10 +80,11 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="40dp"
                 android:hint="Full Name"
-                android:textColorHint="#FFFFFF"
+                android:textColorHint="@color/white"
                 app:boxBackgroundColor="#00FFFFFF"
                 app:boxStrokeColor="#FFFFFF"
-                app:boxStrokeWidth="20dp">
+                app:boxStrokeWidth="2dp"
+                app:hintTextColor="@color/buttonColor">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/nameEditText"
@@ -100,10 +104,13 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="40dp"
                 android:hint="Password"
-                android:textColorHint="#FFFFFF"
+                android:textColorHint="@color/white"
                 app:boxBackgroundColor="#00FFFFFF"
                 app:boxStrokeColor="#FFFFFF"
-                app:boxStrokeWidth="20dp">
+                app:boxStrokeWidth="2dp"
+                app:hintTextColor="@color/buttonColor"
+                app:passwordToggleEnabled="true"
+                app:passwordToggleTint="@color/white">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/passwordEditText"
@@ -123,10 +130,11 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="40dp"
                 android:hint="Student ID"
-                android:textColorHint="#FFFFFF"
+                android:textColorHint="@color/white"
                 app:boxBackgroundColor="#00FFFFFF"
                 app:boxStrokeColor="#FFFFFF"
-                app:boxStrokeWidth="20dp">
+                app:boxStrokeWidth="2dp"
+                app:hintTextColor="@color/buttonColor">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/idEditText"
@@ -139,13 +147,24 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchMaterial"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:paddingHorizontal="40dp"
+                android:text="Use Biometric Login?"
+                android:textColor="@color/white"
+                app:showText="false"
+                app:switchPadding="30dp" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/signUpButton"
                 style="@style/buttonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="40dp"
+                android:layout_marginTop="20dp"
                 android:text="Sign Up"
                 android:textColor="#000000" />
         </LinearLayout>

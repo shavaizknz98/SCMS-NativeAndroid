@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:background="@color/colorPageBackground"
         app:tabBackground="@color/colorPrimary"
-        app:tabIndicator="@color/colorPrimary"
+        app:tabIndicator="@color/buttonColor"
         app:tabIndicatorColor="@color/buttonColor"
         app:tabIndicatorHeight="2dp"
         app:tabSelectedTextColor="#FFFFFF"
@@ -24,5 +24,6 @@
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:background="@color/colorPageBackground" />
 </LinearLayout>

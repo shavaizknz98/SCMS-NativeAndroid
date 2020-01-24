@@ -30,6 +30,7 @@ public class NavigationActivity extends AppCompatActivity implements BottomNavig
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(this);
 
+
     }
     private boolean loadFragment(androidx.fragment.app.Fragment fragment) {
         //switching fragment

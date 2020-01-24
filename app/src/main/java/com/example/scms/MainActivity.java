@@ -2,8 +2,10 @@ package com.example.scms;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.hardware.biometrics.BiometricManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -57,4 +59,6 @@ public class MainActivity extends AppCompatActivity implements LoginTab.OnFragme
     public void onFragmentInteraction(Uri uri) {
 
     }
+
+
 }
