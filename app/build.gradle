@@ -37,8 +37,12 @@ dependencies {
     implementation 'androidx.biometric:biometric:1.0.1'
     implementation 'androidx.transition:transition:1.3.0-rc02'
     implementation(group: 'com.an.biometric', name: 'biometric-auth', version: '0.1.0', ext: 'aar', classifier: '')
+<<<<<<< HEAD
 
     implementation 'com.journeyapps:zxing-android-embedded:4.0.2'
 
     implementation 'com.karumi:dexter:6.0.2'
+=======
+    implementation "com.airbnb.android:lottie:3.0.0-beta1"
+>>>>>>> c2be603219e4357a433d49ef6daab5cb9b84e166
 }

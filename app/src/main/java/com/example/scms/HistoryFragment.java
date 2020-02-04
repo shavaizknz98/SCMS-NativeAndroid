@@ -11,6 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.airbnb.lottie.LottieAnimationView;
+import com.google.android.gms.maps.MapView;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -28,6 +31,7 @@ public class HistoryFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private LottieAnimationView emptyHistory;
 
     private OnFragmentInteractionListener mListener;
 
@@ -65,7 +69,14 @@ public class HistoryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_history, null);
+
+        View v = inflater.inflate(R.layout.fragment_history, container, false);
+        emptyHistory = v.findViewById(R.id.noHistoryAnim);
+
+
+
+
+        return v;
 
     }
 

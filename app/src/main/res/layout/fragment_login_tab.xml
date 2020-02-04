@@ -27,6 +27,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:imeOptions="actionNext"
             android:textColor="#FFFFFF"
             android:textColorHighlight="@color/white"
             android:textColorHint="#FFFFFF" />
