@@ -1,21 +1,41 @@
 package com.example.scms;
 
+import android.Manifest;
 import android.app.ActionBar;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 
 
 /**
@@ -26,13 +46,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
  * Use the {@link BookFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BookFragment extends Fragment implements OnMapReadyCallback {
+public class BookFragment extends Fragment implements OnMapReadyCallback, View.OnClickListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    public static final int REQ_CODE = 999;
     private MapView mapView;
     private GoogleMap gmap;
+
+    private FloatingActionButton scanQRFAB;
 
     private static final String MAP_VIEW_BUNDLE_KEY = "AIzaSyBiMSFk-do4ySBxulASfk2wm2pik1Z-CSs";
 
@@ -85,7 +108,6 @@ public class BookFragment extends Fragment implements OnMapReadyCallback {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
     }
 
     @Override
@@ -103,8 +125,95 @@ public class BookFragment extends Fragment implements OnMapReadyCallback {
 
         mapView.onCreate(mapViewBundle);
         mapView.getMapAsync(this);
-        return v;
 
+        scanQRFAB = (FloatingActionButton) v.findViewById(R.id.scanQRFAB);
+        scanQRFAB.setOnClickListener(this);
+        return v;
+    }
+
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.scanQRFAB:
+                AlertDialog.Builder builder = new AlertDialog.Builder((getContext()));//add 2nd parameter here R.style.theme
+                builder.setTitle("Attention!");
+                builder.setIcon(R.drawable.ic_warning_black_24dp);
+                builder.setMessage("Please make sure you have reserved a bike before scanning.")
+                        .setCancelable(true)
+                        .setPositiveButton("I reserved a bike", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //ok
+                                //request permissions here
+                                Dexter.withActivity(getActivity())
+                                        .withPermission(Manifest.permission.CAMERA)
+                                        .withListener(new PermissionListener() {
+                                            @Override
+                                            public void onPermissionGranted(PermissionGrantedResponse response) {
+                                                //success
+                                                Snackbar snackbar = Snackbar.make(getView(), "Have camera permissions", Snackbar.LENGTH_SHORT);
+                                                snackbar.show();
+                                                Intent intent = new Intent(getActivity(), QRCodeScannerActivity.class);
+                                               // startActivityForResult(intent, REQ_CODE);//will be start activity for result to get scanned value
+                                                //new IntentIntegrator(getActivity()).setOrientationLocked(false).setCaptureActivity(QRCodeScannerActivity.class).initiateScan();
+                                               // new IntentIntegrator(getActivity()).initiateScan(); // `this` is the current Activity
+                                                IntentIntegrator.forSupportFragment(BookFragment.this).setOrientationLocked(false).setCaptureActivity(QRCodeScannerActivity.class).initiateScan(); // `this` is the current Fragment
+
+
+                                            }
+
+                                            @Override
+                                            public void onPermissionDenied(PermissionDeniedResponse response) {
+                                                Snackbar snackbar = Snackbar.make(getView(), "Permission for camera is needed to be able to scan the QR code!", Snackbar.LENGTH_LONG)
+                                                        .setAction("Settings", new View.OnClickListener() {
+                                                            @Override
+                                                            public void onClick(View v) {
+                                                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                                                Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
+                                                                intent.setData(uri);
+                                                                startActivity(intent);
+                                                            }
+                                                        });
+                                                snackbar.show();
+                                            }
+
+                                            @Override
+                                            public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+                                                token.continuePermissionRequest();  //ask it again
+                                                //if it is denied then it wont be asked again, so user can go enable it from the snackbar
+                                            }
+                                        })
+                                        .check();
+                            }
+                        })
+                        .setNegativeButton("Go back", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //nothing
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+                alertDialog.getButton(Dialog.BUTTON_NEGATIVE).setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));  //make a colors entry
+                alertDialog.getButton(Dialog.BUTTON_POSITIVE).setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));
+                alertDialog.getButton(Dialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(getContext(), R.color.colorPageBackground));
+                alertDialog.getButton(Dialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(getContext(), R.color.colorPageBackground));
+                break;
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if(scanResult != null) {
+            Log.d("AAAAA", "onActivityResult:" + scanResult);
+            Toast.makeText(getContext(), scanResult.getContents(), Toast.LENGTH_LONG).show();
+        } else {
+            Log.d("AAAAA", "onActivityResult: FAILED");
+            Toast.makeText(getContext(), "FAILED", Toast.LENGTH_LONG).show();
+            super.onActivityResult(requestCode, resultCode, data);
+
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
