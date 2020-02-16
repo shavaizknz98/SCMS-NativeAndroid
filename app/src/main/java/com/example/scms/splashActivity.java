@@ -1,6 +1,7 @@
 package com.example.scms;
 
 import android.content.Intent;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 
@@ -13,9 +14,10 @@ public class splashActivity extends AwesomeSplash {
 
     @Override
     public void initSplash(ConfigSplash configSplash) {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
+      // ActionBar actionBar = getSupportActionBar();
+       // actionBar.hide();
 
+        Toast.makeText(this, "Build 2", Toast.LENGTH_SHORT).show();
         setTitle("");
         //Customize Circular Reveal
         configSplash.setBackgroundColor(R.color.colorPrimaryDark); //any color you want form colors.xml
