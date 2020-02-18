@@ -26,10 +26,20 @@ import com.an.biometric.BiometricManager;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 
+import java.io.IOException;
 import java.security.KeyStore;
+import java.util.List;
 
 import javax.crypto.Cipher;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import static androidx.constraintlayout.widget.Constraints.TAG;
 
 
 /**
@@ -50,7 +60,7 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
     private EditText emailAddrEditText;
     private EditText phoneNumberEditText;
     private EditText nameEditText;
-    private EditText IDEditText;
+    //private EditText IDEditText;
     private EditText passwordEditText;
     private SwitchMaterial switchMaterial;
 
@@ -128,14 +138,15 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
         passwordEditText = view.findViewById(R.id.passwordEditText);
         nameEditText = view.findViewById(R.id.nameEditText);
         phoneNumberEditText = view.findViewById(R.id.phoneNumberEditText);
-        IDEditText = view.findViewById(R.id.idEditText);
+        //IDEditText = view.findViewById(R.id.idEditText);
         switchMaterial = view.findViewById(R.id.switchMaterial);
 
 
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(switchMaterial.isChecked()) {
+                //TODO save biometric login choice to sharedprefs so that in the sign in screen it can be used instead of email/pw
+                /*if(switchMaterial.isChecked()) {
                     mBiometricManager = new BiometricManager.BiometricBuilder(getContext()).setTitle("Use Biometric Sign In")
                             .setSubtitle("")
                             .setDescription("Please Sign In Using Biometrics")
@@ -149,7 +160,70 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
                     Intent toNavigationActivity = new Intent(getActivity(), NavigationActivity.class);
                     startActivity(toNavigationActivity);
                     getActivity().finish();
+                }*/
+
+                String email, phoneNumber, fullName, password;
+
+                if(emailAddrEditText.getText().toString().isEmpty()) {
+                    Toast.makeText(getActivity(), "You must enter your email!", Toast.LENGTH_LONG).show();
+                    emailAddrEditText.requestFocus();
+                    return;
                 }
+                    //TODO add email regex
+
+                if(phoneNumberEditText.getText().toString().isEmpty()) {
+                    Toast.makeText(getActivity(), "You must enter your phone number!", Toast.LENGTH_LONG).show();
+                    phoneNumberEditText.requestFocus();
+                    return;
+                }
+                    //TODO add phone regex?
+
+
+                if(nameEditText.getText().toString().isEmpty()) {
+                    Toast.makeText(getActivity(), "You must enter your name!", Toast.LENGTH_LONG).show();
+                    nameEditText.requestFocus();
+                    return;
+                }
+
+                if(passwordEditText.getText().toString().isEmpty()) {
+                    Toast.makeText(getActivity(), "You must enter a password!", Toast.LENGTH_LONG).show();
+                    passwordEditText.requestFocus();
+                    return;
+                }
+                    //TODO add hashing
+                    //TODO add minimum length check
+
+                email = emailAddrEditText.getText().toString();
+                phoneNumber = phoneNumberEditText.getText().toString();
+                fullName = nameEditText.getText().toString();
+                password = passwordEditText.getText().toString();
+
+
+
+                Call<ResponseBody> call = RetrofitClient
+                        .getRetrofitClient()
+                        .getAPI()
+                        .signUpUser(email, phoneNumber, fullName, password);
+
+                //make post request here
+                call.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        try {
+                            String s = response.body().string();
+                            Log.d(TAG, "onResponse: " + s);
+                            Toast.makeText(getActivity(), "onResponse: " + s, Toast.LENGTH_LONG).show();
+                        } catch (IOException e) {
+                            Log.e(TAG, "onResponse: " + e.getStackTrace());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Toast.makeText(getActivity(), "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "onFailure: " + t.getStackTrace());
+                    }
+                });
             }
         });
     }
