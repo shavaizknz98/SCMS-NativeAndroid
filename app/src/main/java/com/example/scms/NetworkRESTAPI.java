@@ -9,7 +9,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 
-public interface PostSignupAPI {
+public interface NetworkRESTAPI {
 //10.25.149.7:5000/user/test
 
     @FormUrlEncoded //you have to do this
@@ -19,5 +19,13 @@ public interface PostSignupAPI {
             @Field("phonenumber") String phoneNumber,
             @Field("fullname") String fullName,
             @Field("password") String password
+    );
+
+
+    @FormUrlEncoded
+    @POST("post")
+    Call<ResponseBody> signInUser(
+        @Field("email") String emailAddress,
+                @Field("password") String password
     );
 }

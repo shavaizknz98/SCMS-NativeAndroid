@@ -193,10 +193,10 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
                     //TODO add hashing
                     //TODO add minimum length check
 
-                email = emailAddrEditText.getText().toString();
-                phoneNumber = phoneNumberEditText.getText().toString();
-                fullName = nameEditText.getText().toString();
-                password = passwordEditText.getText().toString();
+                email = emailAddrEditText.getText().toString().trim();
+                phoneNumber = phoneNumberEditText.getText().toString().trim();
+                fullName = nameEditText.getText().toString().trim();
+                password = passwordEditText.getText().toString().trim();
 
 
 
@@ -213,6 +213,9 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
                             String s = response.body().string();
                             Log.d(TAG, "onResponse: " + s);
                             Toast.makeText(getActivity(), "onResponse: " + s, Toast.LENGTH_LONG).show();
+                            Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
+                            startActivity(toNavigationActivity);
+                            getActivity().finish();
                         } catch (IOException e) {
                             Log.e(TAG, "onResponse: " + e.getStackTrace());
                         }

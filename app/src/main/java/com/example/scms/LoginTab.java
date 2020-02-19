@@ -9,12 +9,24 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputLayout;
+
+import java.io.IOException;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import static androidx.constraintlayout.widget.Constraints.TAG;
 
 
 /**
@@ -37,6 +49,9 @@ public class LoginTab extends Fragment {
     private Button loginButton;
     private TextInputLayout loginLayout;
 
+    private Button signInButton;
+    private EditText emailAddrEditText;
+    private EditText passwordEditText;
     private OnFragmentInteractionListener mListener;
 
     public LoginTab() {
@@ -74,16 +89,47 @@ public class LoginTab extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         loginButton = view.findViewById(R.id.logInButton);
-        loginLayout = view.findViewById(R.id.emailAddrEditText);
+
+        emailAddrEditText = view.findViewById(R.id.emailAddrEditText);
+        passwordEditText = view.findViewById(R.id.passwordEditText);
+
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
-                startActivity(toNavigationActivity);
-                getActivity().finish();
+                String email = emailAddrEditText.getText().toString().trim();
+                String password = passwordEditText.getText().toString().trim();
+                Call<ResponseBody> call = RetrofitClient
+                        .getRetrofitClient()
+                        .getAPI()
+                        .signInUser(email,password);
+
+
+
+                //make post request here
+                call.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        try {
+                            String s = response.body().string();
+                            Log.d(TAG, "onResponse: " + s);
+                            Toast.makeText(getActivity(), "onResponse: " + s, Toast.LENGTH_LONG).show();
+                            Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
+                            startActivity(toNavigationActivity);
+                            getActivity().finish();
+                        } catch (IOException e) {
+                            Log.e(TAG, "onResponse: " + e.getStackTrace());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Toast.makeText(getActivity(), "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "onFailure: " + t.getStackTrace());
+                    }
+                });
+
             }
-        });
-    }
+        });}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

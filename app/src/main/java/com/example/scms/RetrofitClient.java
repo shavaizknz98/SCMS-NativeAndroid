@@ -24,8 +24,8 @@ public class RetrofitClient {
         return mRetrofitClient;
     }
 
-    public PostSignupAPI getAPI() {
-        return retrofit.create(PostSignupAPI.class);
+    public NetworkRESTAPI getAPI() {
+            return retrofit.create(NetworkRESTAPI.class);
     }
 
 }

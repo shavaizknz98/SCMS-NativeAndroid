@@ -18,7 +18,7 @@ public class splashActivity extends AwesomeSplash {
        // actionBar.hide();
 
         Toast.makeText(this, "Build 2", Toast.LENGTH_SHORT).show();
-        setTitle("");
+        //setTitle("");
         //Customize Circular Reveal
         configSplash.setBackgroundColor(R.color.colorPrimaryDark); //any color you want form colors.xml
         configSplash.setAnimCircularRevealDuration(10); //int ms
