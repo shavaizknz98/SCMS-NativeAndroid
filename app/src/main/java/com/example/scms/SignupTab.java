@@ -213,9 +213,9 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
                             String s = response.body().string();
                             Log.d(TAG, "onResponse: " + s);
                             Toast.makeText(getActivity(), "onResponse: " + s, Toast.LENGTH_LONG).show();
-                            Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
-                            startActivity(toNavigationActivity);
-                            getActivity().finish();
+                            //Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
+                            //startActivity(toNavigationActivity);
+                            //getActivity().finish();
                         } catch (IOException e) {
                             Log.e(TAG, "onResponse: " + e.getStackTrace());
                         }

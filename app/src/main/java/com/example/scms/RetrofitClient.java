@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
 
-    public static final String BASE_URL = "https://postman-echo.com";
+    public static final String BASE_URL = "http://10.25.154.131:5000";
     private static RetrofitClient mRetrofitClient;
     private Retrofit retrofit;
 

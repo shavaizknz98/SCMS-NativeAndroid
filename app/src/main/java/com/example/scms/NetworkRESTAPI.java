@@ -13,9 +13,9 @@ public interface NetworkRESTAPI {
 //10.25.149.7:5000/user/test
 
     @FormUrlEncoded //you have to do this
-    @POST("post")   //last thing from the url only
+    @POST("user/signUp")   //last thing from the url only
     Call<ResponseBody> signUpUser(
-            @Field("email") String emailAddress,
+            @Field("user_email") String emailAddress,
             @Field("phonenumber") String phoneNumber,
             @Field("fullname") String fullName,
             @Field("password") String password
@@ -23,9 +23,9 @@ public interface NetworkRESTAPI {
 
 
     @FormUrlEncoded
-    @POST("post")
+    @POST("user/login")
     Call<ResponseBody> signInUser(
-        @Field("email") String emailAddress,
-                @Field("password") String password
+        @Field("user_email") String emailAddress,
+        @Field("password") String password
     );
 }
