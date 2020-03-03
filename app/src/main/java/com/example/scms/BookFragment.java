@@ -324,33 +324,32 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
     public void onMapReady(GoogleMap googleMap) {
         gmap = googleMap;
         gmap.setOnMarkerClickListener(this);
+        gmap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
         //25.3144447,55.3625
         //25.312769, 55.492643
 
         LatLng AUSLatLng = new LatLng(25.312769, 55.492643);
-        LatLng AUSNW = new LatLng(25.318759, 55.490930);
-        LatLng AUSSE = new LatLng(25.303328, 55.492765);
+        LatLng AUSNE = new LatLng(25.313475, 55.500086);
+        LatLng AUSSW = new LatLng(25.308831, 55.483615);
 
         com.google.android.gms.maps.model.LatLng AUS_EB2 = new com.google.android.gms.maps.model.LatLng(25.311888, 55.491579);
 
         gmap.getUiSettings().setAllGesturesEnabled(false);
         gmap.getUiSettings().setZoomGesturesEnabled(true);
         gmap.getUiSettings().setScrollGesturesEnabled(true);
+        LatLngBounds AUSBounds = new LatLngBounds(AUSSW, AUSNE);    //SE comes before NW for some godforsaken reason
 
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(AUS_EB2)      // Sets the center of the map to eb2
-                .zoom(18)                   // Sets the zoom
+                .zoom(15.7f)                   // Sets the zoom
                 .bearing(34)                //AUS is oriented straight
                 .tilt(0)                   // Sets the tilt of the camera to 0 degrees
                 .build();                   // Creates a CameraPosition from the builder
         gmap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
-        LatLngBounds AUSBounds = new LatLngBounds(AUSSE, AUSNW);    //SE comes before NW for some godforsaken reason
-        //gmap.setLatLngBoundsForCameraTarget(AUSBounds);
-        gmap.setMaxZoomPreference(18);
-        gmap.setMinZoomPreference(15.7f); //15.7f to fit width of aus campus
-
+        gmap.setLatLngBoundsForCameraTarget(AUSBounds);
+        gmap.setMinZoomPreference(15.7f);
         LatLng EB2_stand = new LatLng(25.311577, 55.491686);
         MarkerOptions EB2 = new MarkerOptions()
                             .position(EB2_stand)
