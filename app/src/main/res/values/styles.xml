@@ -33,4 +33,9 @@
         <item name="backgroundTint">@color/buttonColor</item>
     </style>
 
+    <style name="AppTheme.PopupBikeAvailabilityStyle">
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
 </resources>

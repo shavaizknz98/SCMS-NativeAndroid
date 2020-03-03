@@ -12,6 +12,7 @@ import retrofit2.http.POST;
 public interface NetworkRESTAPI {
 //10.25.149.7:5000/user/test
 
+    //user sign up
     @FormUrlEncoded //you have to do this
     @POST("user/signUp")   //last thing from the url only
     Call<ResponseBody> signUpUser(
@@ -22,10 +23,19 @@ public interface NetworkRESTAPI {
     );
 
 
+    //user login
     @FormUrlEncoded
     @POST("user/login")
     Call<ResponseBody> signInUser(
         @Field("user_email") String emailAddress,
         @Field("password") String password
+    );
+
+
+    //get available bikes
+    @FormUrlEncoded
+    @POST("/user/getAvailableBikes")
+    Call<ResponseBody> getAvailableBikes (
+            @Field("temp") String randomThing
     );
 }

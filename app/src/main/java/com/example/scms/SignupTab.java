@@ -1,6 +1,7 @@
 package com.example.scms;
 
 import android.app.KeyguardManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.fingerprint.FingerprintManager;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -26,9 +28,14 @@ import com.an.biometric.BiometricManager;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.security.KeyStore;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 
@@ -50,7 +57,7 @@ import static androidx.constraintlayout.widget.Constraints.TAG;
  * Use the {@link SignupTab#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SignupTab extends Fragment implements BiometricCallback, View.OnClickListener {
+public class SignupTab extends Fragment implements BiometricCallback, View.OnClickListener/*, View.OnFocusChangeListener*/ {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -77,8 +84,12 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
     private String mParam1;
     private String mParam2;
 
+    private ProgressBar progressBar;
 
     private OnFragmentInteractionListener mListener;
+
+    private Pattern emailPattern = Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
+
 
     public SignupTab() {
         // Required empty public constructor
@@ -110,10 +121,6 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-
-
-
-
     }
 
     @Override
@@ -141,11 +148,34 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
         //IDEditText = view.findViewById(R.id.idEditText);
         switchMaterial = view.findViewById(R.id.switchMaterial);
 
+        //TODO email regex
+        /*
+        emailAddrEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus && !emailAddrEditText.getText().toString().isEmpty()) {
+                    String emailText = emailAddrEditText.getText().toString();
+                    Matcher m = emailPattern.matcher(emailText);
+                    if(m.matches()) {
+                        Toast.makeText(getActivity(), "Email matches", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getActivity(), "Email does not match", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+        });
+        */
+
+        emailAddrEditText.setText("ahmedhamza1999@gmail.com");
+        phoneNumberEditText.setText("123456790");
+        nameEditText.setText("hmed Hamza");
+        passwordEditText.setText("qwertyuiop");
 
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //TODO save biometric login choice to sharedprefs so that in the sign in screen it can be used instead of email/pw
+
                 /*if(switchMaterial.isChecked()) {
                     mBiometricManager = new BiometricManager.BiometricBuilder(getContext()).setTitle("Use Biometric Sign In")
                             .setSubtitle("")
@@ -169,7 +199,6 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
                     emailAddrEditText.requestFocus();
                     return;
                 }
-                    //TODO add email regex
 
                 if(phoneNumberEditText.getText().toString().isEmpty()) {
                     Toast.makeText(getActivity(), "You must enter your phone number!", Toast.LENGTH_LONG).show();
@@ -193,7 +222,9 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
                     //TODO add hashing
                     //TODO add minimum length check
 
-                email = emailAddrEditText.getText().toString().trim();
+
+
+                email = emailAddrEditText.getText().toString().toLowerCase().trim();
                 phoneNumber = phoneNumberEditText.getText().toString().trim();
                 fullName = nameEditText.getText().toString().trim();
                 password = passwordEditText.getText().toString().trim();
@@ -211,11 +242,33 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         try {
                             String s = response.body().string();
-                            Log.d(TAG, "onResponse: " + s);
+                            //Log.d(TAG, "onResponse: " + s);
                             Toast.makeText(getActivity(), "onResponse: " + s, Toast.LENGTH_LONG).show();
-                            //Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
-                            //startActivity(toNavigationActivity);
-                            //getActivity().finish();
+                            JSONObject resp = null;
+                            int code = 3;   //if resp is null then user error
+                            try {
+                                resp = new JSONObject(s);
+                                code = resp.getInt("status");
+                                Log.d(TAG, "onResponse: status = " + code);
+                                Toast.makeText(getActivity(), "status = " + code, Toast.LENGTH_SHORT).show();
+                            } catch(JSONException e) {
+                                Log.e(TAG, "onResponse: " + e.toString());
+                            }
+
+                            if(code == 1) {
+                                Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
+                                startActivity(toNavigationActivity);
+                                getActivity().finish();
+                            } else if(code == 0){
+                                Log.d(TAG, "onResponse: user exists");
+                            } else if(code == 2) {
+                                Log.d(TAG, "onResponse: server error");
+                            } else {
+                                Log.d(TAG, "onResponse: user error");
+                            }
+
+
+
                         } catch (IOException e) {
                             Log.e(TAG, "onResponse: " + e.getStackTrace());
                         }

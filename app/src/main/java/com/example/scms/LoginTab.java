@@ -96,6 +96,12 @@ public class LoginTab extends Fragment {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
+                startActivity(toNavigationActivity);
+                getActivity().finish();
+
+                /*
                 String email = emailAddrEditText.getText().toString().trim();
                 String password = passwordEditText.getText().toString().trim();
                 Call<ResponseBody> call = RetrofitClient
@@ -127,7 +133,7 @@ public class LoginTab extends Fragment {
                         Log.e(TAG, "onFailure: " + t.getStackTrace());
                     }
                 });
-
+                */
             }
         });}
 

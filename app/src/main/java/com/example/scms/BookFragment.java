@@ -7,7 +7,12 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -21,11 +26,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -37,6 +50,13 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
+import java.io.IOException;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -46,7 +66,7 @@ import com.karumi.dexter.listener.single.PermissionListener;
  * Use the {@link BookFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BookFragment extends Fragment implements OnMapReadyCallback, View.OnClickListener {
+public class BookFragment extends Fragment implements OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -128,6 +148,31 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
 
         scanQRFAB = (FloatingActionButton) v.findViewById(R.id.scanQRFAB);
         scanQRFAB.setOnClickListener(this);
+
+        Call<ResponseBody> call = RetrofitClient
+                .getRetrofitClient()
+                .getAPI()
+                .getAvailableBikes("HI");
+
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    String r = response.body().string();
+                    Toast.makeText(getActivity(), "response: " + r, Toast.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                    Log.d("BookFragment", "onResponse: " + e.getStackTrace());
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
+
         return v;
     }
 
@@ -246,6 +291,7 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
     public void onResume() {
         super.onResume();
         mapView.onResume();
+        //make reqquest again here
     }
 
     @Override
@@ -277,16 +323,86 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
     @Override
     public void onMapReady(GoogleMap googleMap) {
         gmap = googleMap;
-        gmap.setMinZoomPreference(15);
-        gmap.getUiSettings().setAllGesturesEnabled(true);
+        gmap.setOnMarkerClickListener(this);
+
         //25.3144447,55.3625
         //25.312769, 55.492643
-        com.google.android.gms.maps.model.LatLng AUS = new com.google.android.gms.maps.model.LatLng(25.312769, 55.492643);
-        gmap.moveCamera(CameraUpdateFactory.newLatLng(AUS));
-        gmap.getUiSettings().setScrollGesturesEnabled(false);
+
+        LatLng AUSLatLng = new LatLng(25.312769, 55.492643);
+        LatLng AUSNW = new LatLng(25.318759, 55.490930);
+        LatLng AUSSE = new LatLng(25.303328, 55.492765);
+
+        com.google.android.gms.maps.model.LatLng AUS_EB2 = new com.google.android.gms.maps.model.LatLng(25.311888, 55.491579);
+
+        gmap.getUiSettings().setAllGesturesEnabled(false);
+        gmap.getUiSettings().setZoomGesturesEnabled(true);
+        gmap.getUiSettings().setScrollGesturesEnabled(true);
+
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(AUS_EB2)      // Sets the center of the map to eb2
+                .zoom(18)                   // Sets the zoom
+                .bearing(34)                //AUS is oriented straight
+                .tilt(0)                   // Sets the tilt of the camera to 0 degrees
+                .build();                   // Creates a CameraPosition from the builder
+        gmap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+        LatLngBounds AUSBounds = new LatLngBounds(AUSSE, AUSNW);    //SE comes before NW for some godforsaken reason
+        //gmap.setLatLngBoundsForCameraTarget(AUSBounds);
+        gmap.setMaxZoomPreference(18);
+        gmap.setMinZoomPreference(15.7f); //15.7f to fit width of aus campus
+
+        LatLng EB2_stand = new LatLng(25.311577, 55.491686);
+        MarkerOptions EB2 = new MarkerOptions()
+                            .position(EB2_stand)
+                            .title("EB2 charging station")
+                            .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
+                            .draggable(false);
+
+
+        Marker EB2_marker = gmap.addMarker(EB2);
+        String EB2_tag = "EB2";
+        EB2_marker.setTag(EB2_tag);
+
+        //gmap.moveCamera(CameraUpdateFactory.newLatLng(AUS));
+        //gmap.getUiSettings().setScrollGesturesEnabled(false);
 
     }
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        Intent intent = new Intent(getContext(), PopupBikeAvailabilityActivity.class);
+        String loc = (String) marker.getTag();
+        Log.d("BookFragment", "onMarkerClick: " + loc + " clicked");
+        intent.putExtra("loc", loc);
+        startActivity(intent);
+        return false;
+    }
+
+
+    public static BitmapDescriptor generateBitmapDescriptorFromRes(
+            Context context, int resId) {
+        Drawable drawable = ContextCompat.getDrawable(context, resId);
+        drawable.setBounds(
+                0,
+                0,
+                drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(
+                drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    /*
+    public static BitmapDescriptor scaleBitmap() {
+        int width = 100;
+        int height = 100;
+        Bitmap b = BitmapFactory.decodeResource(, )
+    }*/
+    
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
