@@ -5,12 +5,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 
-public class PopupBikeAvailabilityActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public class PopupBikeAvailabilityActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     String location = "";
 
+
+    private ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +42,31 @@ public class PopupBikeAvailabilityActivity extends AppCompatActivity {
 
         getWindow().setAttributes(params);
 
+        setTitle("Available Bikes");
+        listView = (ListView) findViewById(R.id.ListView);
+        ArrayList<HashMap<String, String>> data = new ArrayList<HashMap<String, String>>();
+        HashMap<String, String> map = new HashMap<String, String>();
+        map.put("bikeID", "Bike0");
+        data.add(map);
+        listView.setOnItemClickListener(this);
+        // create the resource, from, and to variables
+        int resource = R.layout.bike_layout;
+        String[] from = {"bikeID"}; //From to to populate cell views with the data from the hashmap
+        int[] to = {R.id.bikeID};
+
+
+        // create and set the adapter
+        SimpleAdapter adapter =
+                new SimpleAdapter(this, data, resource, from, to);
+
+        listView.setAdapter(adapter);//Set adapter
+
+
+
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
     }
 }
