@@ -19,6 +19,9 @@ import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 
 import okhttp3.ResponseBody;
@@ -93,15 +96,11 @@ public class LoginTab extends Fragment {
         emailAddrEditText = view.findViewById(R.id.emailAddrEditText);
         passwordEditText = view.findViewById(R.id.passwordEditText);
 
+        emailAddrEditText.setText("b00067567@aus.edu");
+        passwordEditText.setText("Becooler-98");
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
-                startActivity(toNavigationActivity);
-                getActivity().finish();
-
-                /*
                 String email = emailAddrEditText.getText().toString().trim();
                 String password = passwordEditText.getText().toString().trim();
                 Call<ResponseBody> call = RetrofitClient
@@ -113,18 +112,45 @@ public class LoginTab extends Fragment {
 
                 //make post request here
                 call.enqueue(new Callback<ResponseBody>() {
+
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        String r = null;
                         try {
-                            String s = response.body().string();
-                            Log.d(TAG, "onResponse: " + s);
-                            Toast.makeText(getActivity(), "onResponse: " + s, Toast.LENGTH_LONG).show();
+                            r = response.body().string();
+                            Toast.makeText(getActivity(), r, Toast.LENGTH_SHORT).show();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        JSONObject resp = null;
+                    /*
+                    code = 0 user not registered
+                    code = 1 login successfully
+                    code = 2 server error
+                    code = 3 wrong password
+                     */
+                        int code = 4;
+                        try {
+                            resp = new JSONObject(r);
+                            code = resp.getInt("status");
+                        } catch (JSONException e) {
+                            Log.d("BookFragment", "onResponse: " + e.getStackTrace());
+                        }
+
+                        if (code == 0) {
+                            Toast.makeText(getContext(), "User is not registered", Toast.LENGTH_LONG);
+                        } else if (code == 1) {
                             Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
                             startActivity(toNavigationActivity);
                             getActivity().finish();
-                        } catch (IOException e) {
-                            Log.e(TAG, "onResponse: " + e.getStackTrace());
+                        } else if (code == 2) {
+                            Toast.makeText(getActivity(), "Server error, please try again later", Toast.LENGTH_LONG);
+                        } else if (code == 3) {
+                            Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_LONG);
+                        } else if (code == 4) {
+                            Toast.makeText(getActivity(), "Please connect to the internet", Toast.LENGTH_LONG);
                         }
+
                     }
 
                     @Override
@@ -133,7 +159,7 @@ public class LoginTab extends Fragment {
                         Log.e(TAG, "onFailure: " + t.getStackTrace());
                     }
                 });
-                */
+
             }
         });}
 

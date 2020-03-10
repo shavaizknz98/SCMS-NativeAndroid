@@ -17,7 +17,7 @@ import java.util.HashMap;
 public class PopupBikeAvailabilityActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     String location = "";
-
+    String [] availableBikes;
 
     private ListView listView;
     @Override
@@ -26,7 +26,10 @@ public class PopupBikeAvailabilityActivity extends AppCompatActivity implements 
         setContentView(R.layout.activity_popup_bike_availability);
 
         location = getIntent().getExtras().getString("loc");
+        availableBikes = getIntent().getExtras().getStringArray("availableBikes");
         if(location == null) finish();
+        setTitle("location");
+
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -42,27 +45,26 @@ public class PopupBikeAvailabilityActivity extends AppCompatActivity implements 
 
         getWindow().setAttributes(params);
 
-        setTitle("Available Bikes");
         listView = (ListView) findViewById(R.id.ListView);
         ArrayList<HashMap<String, String>> data = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> map = new HashMap<String, String>();
-        map.put("bikeID", "Bike0");
-        data.add(map);
-        listView.setOnItemClickListener(this);
+        for(int i=0; i < availableBikes.length; i++){
+            HashMap<String, String> map = new HashMap<String, String>();
+            map.put("bikeID", availableBikes[i]);
+            data.add(map);
+        }
+
         // create the resource, from, and to variables
         int resource = R.layout.bike_layout;
-        String[] from = {"bikeID"}; //From to to populate cell views with the data from the hashmap
+        String [] from = {"bikeID"};
+
+
         int[] to = {R.id.bikeID};
-
-
         // create and set the adapter
         SimpleAdapter adapter =
                 new SimpleAdapter(this, data, resource, from, to);
 
         listView.setAdapter(adapter);//Set adapter
-
-
-
+        listView.setOnItemClickListener(this);
     }
 
     @Override

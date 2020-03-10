@@ -1,17 +1,13 @@
 package com.example.scms;
 
 import android.Manifest;
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -52,6 +47,10 @@ import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.io.IOException;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -71,6 +70,13 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private String [] bikesInESBSlot;
+    private String [] bikesInPHYSlot;
+    private String [] bikesInEBSlot;
+    private String [] bikesInSBASlot;
+    private String [] bikesInMBSlot;
+    private String [] bikesInSCSlot;
+
     public static final int REQ_CODE = 999;
     private MapView mapView;
     private GoogleMap gmap;
@@ -121,6 +127,7 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
 
         mapView.onSaveInstanceState(mapViewBundle);
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -136,7 +143,6 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
         View v = inflater.inflate(R.layout.fragment_book, container, false);
 
 
-
         mapView = (MapView) v.findViewById(R.id.mapView);
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
@@ -148,30 +154,6 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
 
         scanQRFAB = (FloatingActionButton) v.findViewById(R.id.scanQRFAB);
         scanQRFAB.setOnClickListener(this);
-
-        Call<ResponseBody> call = RetrofitClient
-                .getRetrofitClient()
-                .getAPI()
-                .getAvailableBikes("HI");
-
-
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    String r = response.body().string();
-                    Toast.makeText(getActivity(), "response: " + r, Toast.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    Log.d("BookFragment", "onResponse: " + e.getStackTrace());
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-            }
-        });
 
         return v;
     }
@@ -198,9 +180,9 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
                                                 Snackbar snackbar = Snackbar.make(getView(), "Have camera permissions", Snackbar.LENGTH_SHORT);
                                                 snackbar.show();
                                                 Intent intent = new Intent(getActivity(), QRCodeScannerActivity.class);
-                                               // startActivityForResult(intent, REQ_CODE);//will be start activity for result to get scanned value
+                                                // startActivityForResult(intent, REQ_CODE);//will be start activity for result to get scanned value
                                                 //new IntentIntegrator(getActivity()).setOrientationLocked(false).setCaptureActivity(QRCodeScannerActivity.class).initiateScan();
-                                               // new IntentIntegrator(getActivity()).initiateScan(); // `this` is the current Activity
+                                                // new IntentIntegrator(getActivity()).initiateScan(); // `this` is the current Activity
                                                 IntentIntegrator.forSupportFragment(BookFragment.this).setOrientationLocked(false).setCaptureActivity(QRCodeScannerActivity.class).initiateScan(); // `this` is the current Fragment
 
 
@@ -247,10 +229,18 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
         }
     }
 
+    private String[] getSlotsAsArray(String bikeSlot){
+        String [] result = bikeSlot.replace("]","").replace("[","").replace("\"", "").split(",");
+        if(result[0] == ""){
+            return null;
+        }
+        return result;
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if(scanResult != null) {
+        if (scanResult != null) {
             Log.d("AAAAA", "onActivityResult:" + scanResult);
             Toast.makeText(getContext(), scanResult.getContents(), Toast.LENGTH_LONG).show();
         } else {
@@ -291,7 +281,7 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
     public void onResume() {
         super.onResume();
         mapView.onResume();
-        //make reqquest again here
+        //make request again here
     }
 
     @Override
@@ -305,29 +295,30 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
         super.onStop();
         mapView.onStop();
     }
+
     @Override
     public void onPause() {
         mapView.onPause();
         super.onPause();
     }
+
     @Override
     public void onDestroy() {
         mapView.onDestroy();
         super.onDestroy();
     }
+
     @Override
     public void onLowMemory() {
         super.onLowMemory();
         mapView.onLowMemory();
     }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         gmap = googleMap;
         gmap.setOnMarkerClickListener(this);
         gmap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-
-        //25.3144447,55.3625
-        //25.312769, 55.492643
 
         LatLng AUSLatLng = new LatLng(25.312769, 55.492643);
         LatLng AUSNE = new LatLng(25.313475, 55.500086);
@@ -350,20 +341,85 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
 
         gmap.setLatLngBoundsForCameraTarget(AUSBounds);
         gmap.setMinZoomPreference(15.7f);
-        LatLng EB2_stand = new LatLng(25.311577, 55.491686);
-        MarkerOptions EB2 = new MarkerOptions()
-                            .position(EB2_stand)
-                            .title("EB2 charging station")
-                            .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
-                            .draggable(false);
+
+        updateStationArrays();
 
 
-        Marker EB2_marker = gmap.addMarker(EB2);
-        String EB2_tag = "EB2";
-        EB2_marker.setTag(EB2_tag);
+    }
+    public void markStationsWithAvailableBikes() {
 
-        //gmap.moveCamera(CameraUpdateFactory.newLatLng(AUS));
-        //gmap.getUiSettings().setScrollGesturesEnabled(false);
+        if(bikesInEBSlot !=  null){
+            LatLng EB_Station= new LatLng(25.311577, 55.491686);
+            MarkerOptions EB = new MarkerOptions()
+                    .position(EB_Station)
+                    .title("EB charging station")
+                    .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
+                    .draggable(false);
+
+            Marker EB_marker= gmap.addMarker(EB);
+            String EB_tag = "EB";
+            EB_marker.setTag(EB_tag);
+        }
+        if(bikesInESBSlot != null){
+            LatLng ESB_Station= new LatLng(25.311997, 55.490324);
+            MarkerOptions ESB = new MarkerOptions()
+                    .position(ESB_Station)
+                    .title("ESB charging station")
+                    .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
+                    .draggable(false);
+
+            Marker ESB_marker= gmap.addMarker(ESB);
+            String ESB_tag = "ESB";
+            ESB_marker.setTag(ESB_tag);
+        }
+        if(bikesInMBSlot != null){
+            LatLng MB_Station= new LatLng(25.310396, 55.491005);
+            MarkerOptions MB = new MarkerOptions()
+                    .position(MB_Station)
+                    .title("Main Building charging station")
+                    .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
+                    .draggable(false);
+
+            Marker MB_marker= gmap.addMarker(MB);
+            String MB_tag = "MB";
+            MB_marker.setTag(MB_tag);
+        }
+        if(bikesInPHYSlot != null){
+            LatLng PHY_Station= new LatLng(25.308775, 55.490820);
+            MarkerOptions PHY = new MarkerOptions()
+                    .position(PHY_Station)
+                    .title("Physics charging station")
+                    .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
+                    .draggable(false);
+
+            Marker PHY_marker= gmap.addMarker(PHY);
+            String PHY_tag = "PHY";
+            PHY_marker.setTag(PHY_tag);
+        }
+        if(bikesInSBASlot != null){
+            LatLng SBA_Station= new LatLng(25.310990, 55.492696);
+            MarkerOptions SBA = new MarkerOptions()
+                    .position(SBA_Station)
+                    .title("SBA charging station")
+                    .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
+                    .draggable(false);
+
+            Marker SBA_marker= gmap.addMarker(SBA);
+            String SBA_tag = "SBA";
+            SBA_marker.setTag(SBA_tag);
+        }
+        if(bikesInSCSlot != null){
+            LatLng SC_Station= new LatLng(25.309409, 55.490132);
+            MarkerOptions SC = new MarkerOptions()
+                    .position(SC_Station)
+                    .title("SC charging station")
+                    .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
+                    .draggable(false);
+
+            Marker SC_marker= gmap.addMarker(SC);
+            String SC_tag = "SC";
+            SC_marker.setTag(SC_tag);
+        }
 
     }
 
@@ -371,12 +427,81 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
     public boolean onMarkerClick(Marker marker) {
         Intent intent = new Intent(getContext(), PopupBikeAvailabilityActivity.class);
         String loc = (String) marker.getTag();
+        String [] availableBikes = null;
         Log.d("BookFragment", "onMarkerClick: " + loc + " clicked");
         intent.putExtra("loc", loc);
+        if(loc == "ESB"){
+            availableBikes = bikesInESBSlot;
+        }else if(loc == "EB"){
+            availableBikes = bikesInEBSlot;
+        }else if(loc == "PHY"){
+            availableBikes = bikesInPHYSlot;
+        }else if (loc == "SBA"){
+            availableBikes = bikesInSBASlot;
+        }else if (loc == "SC"){
+            availableBikes = bikesInSCSlot;
+        }else if (loc == "MB"){
+            availableBikes = bikesInMBSlot;
+        }
+        intent.putExtra("availableBikes", availableBikes);
         startActivity(intent);
         return false;
     }
 
+
+    public void updateStationArrays() {
+        Call<ResponseBody> call = RetrofitClient
+                .getRetrofitClient()
+                .getAPI()
+                .getAvailableBikes("HI");
+
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                String r = null;
+                try {
+                    r = response.body().string();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                JSONObject resp = null;
+                try {
+                    resp = new JSONObject(r);
+
+                    String ESB  = resp.getString("ESB");
+                    bikesInESBSlot = getSlotsAsArray(ESB);
+
+                    String PHY = resp.getString("PHY");
+                    bikesInPHYSlot = getSlotsAsArray(PHY);
+
+                    String SBA = resp.getString("SBA");
+                    bikesInSBASlot = getSlotsAsArray(SBA);
+
+                    String EB = resp.getString("EB");
+                    bikesInEBSlot = getSlotsAsArray(EB);
+
+                    String MB = resp.getString("MB");
+                    bikesInMBSlot = getSlotsAsArray(MB);
+
+                    String SC = resp.getString("SC");
+                    bikesInSCSlot = getSlotsAsArray(SC);
+
+                    Toast.makeText(getContext(), r, Toast.LENGTH_SHORT).show();
+                    markStationsWithAvailableBikes();
+                } catch (JSONException e) {
+                    Log.d("BookFragment", "onResponse: " + e.getStackTrace());
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
+    }
 
     public static BitmapDescriptor generateBitmapDescriptorFromRes(
             Context context, int resId) {
@@ -401,7 +526,7 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
         int height = 100;
         Bitmap b = BitmapFactory.decodeResource(, )
     }*/
-    
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
