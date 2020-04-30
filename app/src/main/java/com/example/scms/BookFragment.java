@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -20,6 +21,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -85,6 +87,8 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
 
     private static final String MAP_VIEW_BUNDLE_KEY = "AIzaSyBiMSFk-do4ySBxulASfk2wm2pik1Z-CSs";
 
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -155,6 +159,9 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
         scanQRFAB = (FloatingActionButton) v.findViewById(R.id.scanQRFAB);
         scanQRFAB.setOnClickListener(this);
 
+        prefs = getContext().getSharedPreferences(LoginTab.SCMS_PREFS, Context.MODE_PRIVATE);
+        editor = prefs.edit();
+
         return v;
     }
 
@@ -184,8 +191,6 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
                                                 //new IntentIntegrator(getActivity()).setOrientationLocked(false).setCaptureActivity(QRCodeScannerActivity.class).initiateScan();
                                                 // new IntentIntegrator(getActivity()).initiateScan(); // `this` is the current Activity
                                                 IntentIntegrator.forSupportFragment(BookFragment.this).setOrientationLocked(false).setCaptureActivity(QRCodeScannerActivity.class).initiateScan(); // `this` is the current Fragment
-
-
                                             }
 
                                             @Override
@@ -243,12 +248,86 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
         if (scanResult != null) {
             Log.d("AAAAA", "onActivityResult:" + scanResult);
             Toast.makeText(getContext(), scanResult.getContents(), Toast.LENGTH_LONG).show();
+            startStopRide(scanResult.getContents());
         } else {
             Log.d("AAAAA", "onActivityResult: FAILED");
             Toast.makeText(getContext(), "FAILED", Toast.LENGTH_LONG).show();
             super.onActivityResult(requestCode, resultCode, data);
 
         }
+    }
+
+    void startStopRide(String scanresult) {
+        if(scanresult.isEmpty() || scanresult == "") { return; }
+
+        String userID = prefs.getString("useremail", "");
+        final String c_status = prefs.getString("status", "nobooking");
+
+        Call<ResponseBody> call = null;
+
+        if(c_status == "nobooking") {
+            Toast.makeText(getContext(), "You have not reserved a bike, please reserve one first!", Toast.LENGTH_SHORT).show();
+            return;
+        } else if(c_status == "reserved") {
+            call = RetrofitClient
+                    .getRetrofitClient()
+                    .getAPI()
+                    .startRide(userID, scanresult);
+
+        } else if(c_status == "inride") {
+            call = RetrofitClient
+                    .getRetrofitClient()
+                    .getAPI()
+                    .endRide(userID, scanresult);
+        }
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                String r = null;
+                try {
+                    r = response.body().string();
+                } catch (IOException e) {
+                    Log.d("AAAAA", "onResponse: " + e.getStackTrace());
+                }
+
+                JSONObject resp = null;
+                String status = null;
+
+                try {
+                    resp = new JSONObject(r);
+                    status = resp.getString("status");
+                } catch (JSONException e) {
+                    Log.d("AAAAA", "onResponse: " + e.getStackTrace());
+                }
+
+                switch (status) {
+                    case "0":
+                        String resText = "";
+                        if(c_status == "reserved") resText = "You have not reserved this bike. Please scan the correct QR code.";
+                        else resText = "You have not started a ride.";
+                        Toast.makeText(getContext(), resText, Toast.LENGTH_SHORT).show();
+                        break;
+                    case "1":
+                        String resText2 = "";
+                        if(c_status == "reserved") resText2 = "started";
+                        else resText2 = "ended";
+                        Toast.makeText(getContext(), "Successfully " + resText2 + " ride.", Toast.LENGTH_SHORT).show();
+                        break;
+                    case "2":
+                        Toast.makeText(getContext(), "Server error, please try again.", Toast.LENGTH_SHORT).show();
+                        break;
+                    case "3":
+                        Toast.makeText(getContext(), "The slot you are trying to scan is occupied. Please try another slot.", Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) { }
+        });
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -455,11 +534,9 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
                 .getAPI()
                 .getAvailableBikes("HI");
 
-
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-
                 String r = null;
                 try {
                     r = response.body().string();

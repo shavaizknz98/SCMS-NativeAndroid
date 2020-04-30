@@ -20,7 +20,7 @@
         app:lottie_loop="true" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/textViewNoHistory"
         android:layout_width="306dp"
         android:layout_height="119dp"
         android:layout_marginTop="20dp"
@@ -33,4 +33,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/noHistoryAnim" />
 
+    <ListView
+        android:id="@+id/historyListView"
+        style="@style/Widget.AppCompat.ListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/textViewNoHistory" />
 </androidx.constraintlayout.widget.ConstraintLayout>

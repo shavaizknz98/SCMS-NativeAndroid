@@ -14,7 +14,7 @@ import android.widget.SimpleAdapter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class PopupBikeAvailabilityActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class PopupBikeAvailabilityActivity extends AppCompatActivity {
 
     String location = "";
     String [] availableBikes;
@@ -28,7 +28,7 @@ public class PopupBikeAvailabilityActivity extends AppCompatActivity implements 
         location = getIntent().getExtras().getString("loc");
         availableBikes = getIntent().getExtras().getStringArray("availableBikes");
         if(location == null) finish();
-        setTitle("location");
+        setTitle(location);
 
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -46,7 +46,8 @@ public class PopupBikeAvailabilityActivity extends AppCompatActivity implements 
         getWindow().setAttributes(params);
 
         listView = (ListView) findViewById(R.id.ListView);
-        ArrayList<HashMap<String, String>> data = new ArrayList<HashMap<String, String>>();
+        listView.setAdapter(new BikeListAdapter(availableBikes, this));
+        /*ArrayList<HashMap<String, String>> data = new ArrayList<HashMap<String, String>>();
         for(int i=0; i < availableBikes.length; i++){
             HashMap<String, String> map = new HashMap<String, String>();
             map.put("bikeID", availableBikes[i]);
@@ -65,10 +66,13 @@ public class PopupBikeAvailabilityActivity extends AppCompatActivity implements 
 
         listView.setAdapter(adapter);//Set adapter
         listView.setOnItemClickListener(this);
+         */
     }
-
+/*
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
     }
+
+ */
 }

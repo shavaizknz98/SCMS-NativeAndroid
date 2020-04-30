@@ -38,4 +38,58 @@ public interface NetworkRESTAPI {
     Call<ResponseBody> getAvailableBikes (
             @Field("temp") String randomThing
     );
+
+    //reserve a bike
+    @FormUrlEncoded
+    @POST("/user/reserve")
+    Call<ResponseBody> reserveBike(
+            @Field("user_id") String userID,
+            @Field("bike_id") String bikeID
+    );
+
+    //reserve a bike
+    @FormUrlEncoded
+    @POST("/user/cancelReservation")
+    Call<ResponseBody> cancelReservation(
+            @Field("user_id") String userID,
+            @Field("bike_id") String bikeID
+    );
+
+    //reservation timer
+    @FormUrlEncoded
+    @POST("/user/startReservationTimer")
+    Call<ResponseBody> startReservationTimer(
+            @Field("aa") String empty
+    );
+
+    //report a user
+    @FormUrlEncoded
+    @POST("/user/reportUser")
+    Call<ResponseBody> reportUser(
+            @Field("bike_id") String bikeID
+    );
+
+    //start ride
+    @FormUrlEncoded
+    @POST("/user/startRide")
+    Call<ResponseBody> startRide(
+            @Field("user_id") String userID,
+            @Field("slot_id") String slotID
+    );
+
+    //end ride
+    @FormUrlEncoded
+    @POST("/user/endRide")
+    Call<ResponseBody> endRide(
+            @Field("user_id") String userID,
+            @Field("slot_id") String slotID
+    );
+
+    //get user profile
+    @FormUrlEncoded
+    @POST("/user/getUserInfo")
+    Call<ResponseBody> getUserProfile(
+            @Field("user_email") String userID
+    );
+
 }

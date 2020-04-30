@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SCMS.iml" filepath="$PROJECT_DIR$/SCMS.iml" group="SCMS" />
+      <module fileurl="file://$PROJECT_DIR$/SCMS Native app-SCMS.iml" filepath="$PROJECT_DIR$/SCMS Native app-SCMS.iml" group="SCMS" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="SCMS/app" />
     </modules>
   </component>

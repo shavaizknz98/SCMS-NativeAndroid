@@ -2,6 +2,7 @@ package com.example.scms;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -46,6 +47,8 @@ public class LoginTab extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+    public static final String SCMS_PREFS = "SCMS_PREFS";
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -56,6 +59,9 @@ public class LoginTab extends Fragment {
     private EditText emailAddrEditText;
     private EditText passwordEditText;
     private OnFragmentInteractionListener mListener;
+
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor editor;
 
     public LoginTab() {
         // Required empty public constructor
@@ -96,7 +102,10 @@ public class LoginTab extends Fragment {
         emailAddrEditText = view.findViewById(R.id.emailAddrEditText);
         passwordEditText = view.findViewById(R.id.passwordEditText);
 
-        emailAddrEditText.setText("b00067567@aus.edu");
+        prefs = getContext().getSharedPreferences(SCMS_PREFS, Context.MODE_PRIVATE);
+        editor = prefs.edit();
+
+        emailAddrEditText.setText("ahmedhamza199@gmail.com");
         passwordEditText.setText("Becooler-98");
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,7 +127,8 @@ public class LoginTab extends Fragment {
                         String r = null;
                         try {
                             r = response.body().string();
-                            Toast.makeText(getActivity(), r, Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getActivity(), r, Toast.LENGTH_SHORT).show();
+                            Log.d("AAAAA", "onResponse: login resp: " + r);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -138,17 +148,18 @@ public class LoginTab extends Fragment {
                         }
 
                         if (code == 0) {
-                            Toast.makeText(getContext(), "User is not registered", Toast.LENGTH_LONG);
+                            Toast.makeText(getContext(), "User is not registered", Toast.LENGTH_LONG).show();
                         } else if (code == 1) {
+                            editor.putString("useremail", emailAddrEditText.getText().toString().trim()).commit();
                             Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
                             startActivity(toNavigationActivity);
                             getActivity().finish();
                         } else if (code == 2) {
-                            Toast.makeText(getActivity(), "Server error, please try again later", Toast.LENGTH_LONG);
+                            Toast.makeText(getActivity(), "Server error, please try again later", Toast.LENGTH_LONG).show();
                         } else if (code == 3) {
-                            Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_LONG);
+                            Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_LONG).show();
                         } else if (code == 4) {
-                            Toast.makeText(getActivity(), "Please connect to the internet", Toast.LENGTH_LONG);
+                            Toast.makeText(getActivity(), "Please connect to the internet", Toast.LENGTH_LONG).show();
                         }
 
                     }

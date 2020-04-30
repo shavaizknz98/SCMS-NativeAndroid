@@ -166,10 +166,10 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
         });
         */
 
-        emailAddrEditText.setText("ahmedhamza1999@gmail.com");
+        emailAddrEditText.setText("ahmedhamza199@gmail.com");
         phoneNumberEditText.setText("123456790");
-        nameEditText.setText("hmed Hamza");
-        passwordEditText.setText("qwertyuiop");
+        nameEditText.setText("Ahmed Hamza");
+        passwordEditText.setText("Becooler-98");
 
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -257,6 +257,7 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
 
                             if(code == 1) {
                                 Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
+
                                 startActivity(toNavigationActivity);
                                 getActivity().finish();
                             } else if(code == 0){
