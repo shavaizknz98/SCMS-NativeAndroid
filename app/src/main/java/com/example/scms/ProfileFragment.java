@@ -361,7 +361,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         numRidesTextView.setText(String.valueOf(numRides));
 
-        totalCostTextView.setText(String.valueOf(total_cost) + " AED");
+        totalCostTextView.setText(String.format("%.2f", total_cost) + " AED");
 
         violationScoretextView.setText(violationscore);
 

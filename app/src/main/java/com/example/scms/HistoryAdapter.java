@@ -63,7 +63,12 @@ public class HistoryAdapter extends BaseAdapter implements ListAdapter {
         endLocTextView.setText(endLocs.get(position));
         startTimeTextView.setText(startTimes.get(position));
         endTimeTextView.setText(endTimes.get(position));
-        costTextView.setText(costs.get(position));
+        if(costs.get(position).contains("NA")) {
+            costTextView.setText(costs.get(position));
+
+        } else {
+            costTextView.setText(String.format("%.2f", Float.valueOf(costs.get(position))) + " AED");
+        }
         dateTextView.setText(dates.get(position));
 
 
