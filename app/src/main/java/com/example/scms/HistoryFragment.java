@@ -150,7 +150,7 @@ public class HistoryFragment extends Fragment {
                         costs = new String[totalRides];
 
                         for(int i = 0; i < totalRides; i++) {
-                            JSONObject tmp = history.getJSONObject(i);
+                            JSONObject tmp = history.getJSONObject(totalRides - 1 - i);
                             Log.d("AAAAA", "onResponse: jsonobject" + tmp.toString());
                             startlocs[i] = tmp.getString("fromLocation");
                             endlocs[i] = tmp.getString("toLocation");
