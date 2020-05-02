@@ -2,9 +2,11 @@ package com.example.scms;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -48,7 +50,7 @@ public class HistoryFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    private LottieAnimationView emptyHistory;
+    private LottieAnimationView emptyHistoryAnimation;
     private TextView emptyHistoryTextView;
     private ListView listView;
     private String[] starttimes, endtimes, startlocs, endlocs, costs, dates;
@@ -96,21 +98,15 @@ public class HistoryFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_history, container, false);
-        emptyHistory = v.findViewById(R.id.noHistoryAnim);
+        emptyHistoryAnimation = v.findViewById(R.id.noHistoryAnim);
         emptyHistoryTextView = v.findViewById(R.id.textViewNoHistory);
         listView = (ListView) v.findViewById(R.id.historyListView);
+        ConstraintLayout constraintLayout = (ConstraintLayout) v.findViewById(R.id.historyConstraintLayout);
 
         prefs = getContext().getSharedPreferences(LoginTab.SCMS_PREFS, Context.MODE_PRIVATE);
         editor = prefs.edit();
 
-
-        if(lenHistory == 0) {
-            listView.setVisibility(View.GONE);
-        } else {
-            emptyHistory.setVisibility(View.GONE);
-            emptyHistoryTextView.setVisibility(View.GONE);
-            getHistory();
-        }
+        getHistory();
 
         return v;
     }
@@ -143,27 +139,39 @@ public class HistoryFragment extends Fragment {
                     totalRides = history.length();
                     lenHistory = totalRides;
 
-                    startlocs = new String[totalRides];
-                    endlocs = new String[totalRides];
-                    dates = new String[totalRides];
-                    starttimes = new String[totalRides];
-                    endlocs = new String[totalRides];
-                    costs = new String[totalRides];
+                    Log.d("AAAAA", "onResponse: lenhistory" + lenHistory);
 
-                    for(int i = 0; i < totalRides; i++) {
-                        JSONObject tmp = history.getJSONObject(i);
-                        startlocs[i] = tmp.getString("fromLocation");
-                        endlocs[i] = tmp.getString("toLocation");
-                        starttimes[i] = tmp.getString("rideStartTime");
-                        endtimes[i] = tmp.getString("rideEndTime");
-                        costs[i] = tmp.getString("rideCost");
-                        dates[i] = tmp.getString("reservationDate");
+                    if(lenHistory > 0) {
+                        startlocs = new String[totalRides];
+                        endlocs = new String[totalRides];
+                        dates = new String[totalRides];
+                        starttimes = new String[totalRides];
+                        endtimes = new String[totalRides];
+                        costs = new String[totalRides];
+
+                        for(int i = 0; i < totalRides; i++) {
+                            JSONObject tmp = history.getJSONObject(i);
+                            Log.d("AAAAA", "onResponse: jsonobject" + tmp.toString());
+                            startlocs[i] = tmp.getString("fromLocation");
+                            endlocs[i] = tmp.getString("toLocation");
+                            starttimes[i] = tmp.getString("rideStartTime");
+                            endtimes[i] = tmp.getString("rideEndTime");
+                            costs[i] = tmp.getString("rideCost");
+                            dates[i] = tmp.getString("reservationDate");
+                        }
+
+                        listView.setAdapter(new HistoryAdapter(dates, startlocs, endlocs, starttimes, endtimes, costs, getContext()));
+                    }
+                    if(lenHistory == 0) {
+                        listView.setVisibility(View.GONE);
+                    } else {
+                        emptyHistoryAnimation.setVisibility(View.GONE);
+                        emptyHistoryTextView.setVisibility(View.GONE);
                     }
 
                 } catch (JSONException e) {
                     Log.d("AAAAA", "onResponse: " + e.getStackTrace());
                 }
-                listView.setAdapter(new HistoryAdapter(dates, startlocs, endlocs, starttimes, endtimes, costs, getContext()));
             }
 
             @Override

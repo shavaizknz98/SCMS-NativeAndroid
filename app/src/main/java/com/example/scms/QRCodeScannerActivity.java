@@ -107,7 +107,7 @@ public class QRCodeScannerActivity extends AppCompatActivity implements Decorate
 
     public void changeMaskColor(View view) {
         Random rnd = new Random();
-        int color = Color.argb(100, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+        int color = Color.argb(100, 38, 56, 95);
         viewfinderView.setMaskColor(color);
     }
 

@@ -23,7 +23,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".PopupBikeAvailabilityActivity" android:theme="@style/AppTheme.PopupBikeAvailabilityStyle"></activity>
+        <activity android:name=".ReportUserActivity"></activity>
+        <activity
+            android:name=".PopupBikeAvailabilityActivity"
+            android:theme="@style/AppTheme.PopupBikeAvailabilityStyle" />
         <activity android:name=".QRCodeScannerActivity" />
         <activity
             android:name=".NavigationActivity"

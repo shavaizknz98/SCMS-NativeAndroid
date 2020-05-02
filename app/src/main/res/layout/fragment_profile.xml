@@ -15,7 +15,7 @@
             android:layout_width="330dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:text="Ahmed Riaz "
+            android:text="Name"
             android:textStyle="bold"
             android:gravity="center"
             android:textSize="27sp"
@@ -64,7 +64,7 @@
                     android:layout_height="50dp"
                     android:layout_marginTop="7dp"
                     android:layout_marginLeft="10dp"
-                    android:text="Ride in progress"
+                    android:text="Fetching..."
                     android:textStyle="bold"
                     android:textSize="30sp"
                     android:paddingLeft="8sp"
@@ -72,6 +72,20 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/textViewCurrentStatus"
                     />
+
+                <ImageView
+                    android:id="@+id/imageCurrentStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:scaleType="fitXY"
+                    android:adjustViewBounds="true"
+                    android:layout_marginEnd="30dp"
+                    app:srcCompat="@drawable/ic_info_outline_black_24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                </ImageView>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -115,7 +129,7 @@
                     android:layout_height="50dp"
                     android:layout_marginTop="7dp"
                     android:layout_marginLeft="10dp"
-                    android:text="13"
+                    android:text="Fetching..."
                     android:textStyle="bold"
                     android:textSize="30sp"
                     android:paddingLeft="8sp"
@@ -123,6 +137,20 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/textViewCompletedRides"
                     />
+
+                <ImageView
+                    android:id="@+id/imageCompletedRides"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:scaleType="fitXY"
+                    android:adjustViewBounds="true"
+                    android:layout_marginEnd="30dp"
+                    app:srcCompat="@drawable/ic_directions_bike_white_24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                </ImageView>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -166,7 +194,7 @@
                     android:layout_height="50dp"
                     android:layout_marginTop="7dp"
                     android:layout_marginLeft="10dp"
-                    android:text="89.50 AED"
+                    android:text="Fetching..."
                     android:textStyle="bold"
                     android:textSize="30sp"
                     android:paddingLeft="8sp"
@@ -174,6 +202,20 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/textViewCost"
                     />
+
+                <ImageView
+                    android:id="@+id/imageTotalCost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:scaleType="fitXY"
+                    android:adjustViewBounds="true"
+                    android:layout_marginEnd="30dp"
+                    app:srcCompat="@drawable/ic_attach_money_white_24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                </ImageView>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -217,7 +259,7 @@
                     android:layout_height="50dp"
                     android:layout_marginTop="7dp"
                     android:layout_marginLeft="10dp"
-                    android:text="1"
+                    android:text="Fetching..."
                     android:textStyle="bold"
                     android:textSize="30sp"
                     android:paddingLeft="8sp"
@@ -225,6 +267,20 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/textViewViolationScore"
                     />
+
+                <ImageView
+                    android:id="@+id/imageViolationScore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:scaleType="fitXY"
+                    android:adjustViewBounds="true"
+                    android:layout_marginEnd="30dp"
+                    app:srcCompat="@drawable/ic_error_outline_white_24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                </ImageView>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

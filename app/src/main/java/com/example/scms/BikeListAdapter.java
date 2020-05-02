@@ -117,7 +117,6 @@ public class BikeListAdapter extends BaseAdapter implements ListAdapter {
                                 break;
                             case "1":
                                 Toast.makeText(context, "Reservation successful.", Toast.LENGTH_SHORT).show();
-                                editor.putString("status", "reserved").commit();
                                 break;
                             case "2":
                                 Toast.makeText(context, "Server error. Please try again.", Toast.LENGTH_SHORT).show();

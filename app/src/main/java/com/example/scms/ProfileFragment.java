@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,6 +59,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     private JSONObject userinfoobj;
 
     private TextView titleTextView, currentStatusTextView, numRidesTextView, totalCostTextView, violationScoretextView, contactUsTextView, reportUserTextView;
+
+    private ImageView currentStatusImageVIew, completedRidesImageView, totalCostImageView, violationScoreImageView;
 
     private OnFragmentInteractionListener mListener;
 
@@ -107,6 +110,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         violationScoretextView = v.findViewById(R.id.textViewViolationScoreVal);
         contactUsTextView = v.findViewById(R.id.emailAdmistrationTextView);
         reportUserTextView = v.findViewById(R.id.reportUserTextView);
+
+        completedRidesImageView = v.findViewById(R.id.imageCompletedRides);
+        totalCostImageView = v.findViewById(R.id.imageTotalCost);
+        violationScoreImageView = v.findViewById(R.id.imageViolationScore);
+        currentStatusImageVIew = v.findViewById(R.id.imageCurrentStatus);
+
+
 
         currentStatusTextView.setOnClickListener(this);
         contactUsTextView.setOnClickListener(this);
@@ -170,13 +180,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                             }
 
                                             switch(status) {
-                                                case "1":
+                                                case "0":
                                                     Toast.makeText(getContext(), "You did not reserve this bike!", Toast.LENGTH_SHORT).show();
                                                     break;
-                                                case "2":
+                                                case "1":
                                                     Toast.makeText(getContext(), "Reservation cancelled successfully", Toast.LENGTH_SHORT).show();
                                                     break;
-                                                case "3":
+                                                case "2":
                                                     Toast.makeText(getContext(), "Server error", Toast.LENGTH_SHORT).show();
                                                     break;
                                                 default:
@@ -195,9 +205,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     alertDialog.getButton(Dialog.BUTTON_POSITIVE).setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));
                     alertDialog.getButton(Dialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(getContext(), R.color.colorPageBackground));
                     alertDialog.getButton(Dialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(getContext(), R.color.colorPageBackground));
-
                 }
+                break;
             case R.id.reportUserTextView:
+                Intent intent = new Intent(getActivity(), ReportUserActivity.class);
+                startActivity(intent);
                 break;
 
             case R.id.emailAdmistrationTextView:
@@ -288,18 +300,21 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             name = user.getString("fullname");
             JSONArray hist = user.getJSONArray("history");
             violationscore = user.getString("violationScore");
-            if(user.getString("status") != "NA") {
+            if(user.getString("current_ride").contains("NA")) {
+                flag = 0;
+            } else {
                 flag = 1;
             }
+            Log.d("AAAAA", "updateData: flag" + flag);
 
             for(int i = 0; i < hist.length(); i++) {
                 JSONObject item = hist.getJSONObject(i);
                 String tmpcost = item.getString("rideCost");
-                if(tmpcost != "NA") {
+                if(!tmpcost.contains("NA")) {
                     total_cost += Float.valueOf(tmpcost);
                     numRides++; //if cost is defined then a ride was completed
                 }
-                if(flag == 1 && i == 0) {
+                if(flag == 1 && i == hist.length()-1) {
                     current_status = item.getString("status");  //most recent ride is up top
                 }
             }
@@ -308,14 +323,15 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         }
 
         titleTextView.setText(name);
-
         if(flag == 0) {
             currentStatusTextView.setText("No booking");
         } else {
-            if(current_status == "reserved") {
+            if(current_status.contains("reserved")) {
                 currentStatusTextView.setText("Bike reserved");
-            } else {
+            } else if (current_status.contains("in-ride")) {
                 currentStatusTextView.setText("Ride in progress");
+            } else {
+                currentStatusTextView.setText("No booking");
             }
         }
 

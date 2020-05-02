@@ -51,6 +51,7 @@ import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.io.IOException;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -80,6 +81,8 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
     private String [] bikesInSBASlot;
     private String [] bikesInMBSlot;
     private String [] bikesInSCSlot;
+
+    private String currentstatus;
 
     public static final int REQ_CODE = 999;
     private MapView mapView;
@@ -259,31 +262,15 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
         }
     }
 
-    void startStopRide(String scanresult) {
-        if(scanresult.isEmpty() || scanresult == "") { return; }
+    void startStopRide(final String scanresult) {
+        if(scanresult == null || scanresult.isEmpty() || scanresult == "") { return; }
 
-        String userID = prefs.getString("useremail", "");
-        final String c_status = prefs.getString("status", "nobooking");
-
-        Call<ResponseBody> call = null;
-
-        if(c_status == "nobooking") {
-            Toast.makeText(getContext(), "You have not reserved a bike, please reserve one first!", Toast.LENGTH_SHORT).show();
-            return;
-        } else if(c_status == "reserved") {
-            call = RetrofitClient
-                    .getRetrofitClient()
-                    .getAPI()
-                    .startRide(userID, scanresult);
-
-        } else if(c_status == "inride") {
-            call = RetrofitClient
-                    .getRetrofitClient()
-                    .getAPI()
-                    .endRide(userID, scanresult);
-        }
-
-        call.enqueue(new Callback<ResponseBody>() {
+        final String userID = prefs.getString("useremail", "");
+        Call<ResponseBody> call0 = RetrofitClient
+                .getRetrofitClient()
+                .getAPI()
+                .getUserInfo(userID);
+        call0.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 String r = null;
@@ -292,43 +279,102 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
                 } catch (IOException e) {
                     Log.d("AAAAA", "onResponse: " + e.getStackTrace());
                 }
-
                 JSONObject resp = null;
-                String status = null;
-
                 try {
-                    resp = new JSONObject(r);
-                    status = resp.getString("status");
+                    resp = new JSONObject(r).getJSONObject("result");
+                    if(resp.getString("current_ride").contains("NA")) {
+                        currentstatus = "nobooking";
+                    } else {
+                        JSONArray hist = resp.getJSONArray("history");
+                        int len = hist.length();
+                        if(len != 0) {
+                            JSONObject currentRide = hist.getJSONObject(len-1);
+                            String currentridestatus = currentRide.getString("status");
+                            if(currentridestatus.contains("reserved")) {
+                                currentstatus = "reserved";
+                            } else {
+                                currentstatus = "inride";
+                            }
+                        }
+
+                    }
+
                 } catch (JSONException e) {
                     Log.d("AAAAA", "onResponse: " + e.getStackTrace());
                 }
 
-                switch (status) {
-                    case "0":
-                        String resText = "";
-                        if(c_status == "reserved") resText = "You have not reserved this bike. Please scan the correct QR code.";
-                        else resText = "You have not started a ride.";
-                        Toast.makeText(getContext(), resText, Toast.LENGTH_SHORT).show();
-                        break;
-                    case "1":
-                        String resText2 = "";
-                        if(c_status == "reserved") resText2 = "started";
-                        else resText2 = "ended";
-                        Toast.makeText(getContext(), "Successfully " + resText2 + " ride.", Toast.LENGTH_SHORT).show();
-                        break;
-                    case "2":
-                        Toast.makeText(getContext(), "Server error, please try again.", Toast.LENGTH_SHORT).show();
-                        break;
-                    case "3":
-                        Toast.makeText(getContext(), "The slot you are trying to scan is occupied. Please try another slot.", Toast.LENGTH_SHORT).show();
-                        break;
-                    default:
-                        Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                Call<ResponseBody> call2 = null;
+
+                if(currentstatus == "nobooking") {
+                    Toast.makeText(getContext(), "You have not reserved a bike, please reserve one first!", Toast.LENGTH_SHORT).show();
+                    return;
+                } else if(currentstatus == "reserved") {
+                    call2 = RetrofitClient
+                            .getRetrofitClient()
+                            .getAPI()
+                            .startRide(userID, scanresult);
+
+                } else if(currentstatus == "inride") {
+                    call2 = RetrofitClient
+                            .getRetrofitClient()
+                            .getAPI()
+                            .endRide(userID, scanresult);
                 }
+
+                call2.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        String r = null;
+                        try {
+                            r = response.body().string();
+                        } catch (IOException e) {
+                            Log.d("AAAAA", "onResponse: " + e.getStackTrace());
+                        }
+
+                        JSONObject resp = null;
+                        String status = null;
+
+                        try {
+                            resp = new JSONObject(r);
+                            status = resp.getString("status");
+                        } catch (JSONException e) {
+                            Log.d("AAAAA", "onResponse: " + e.getStackTrace());
+                        }
+
+                        switch (status) {
+                            case "0":
+                                String resText = "";
+                                if(currentstatus == "reserved") resText = "You have not reserved this bike. Please scan the correct QR code.";
+                                else resText = "You have not started a ride.";
+                                Toast.makeText(getContext(), resText, Toast.LENGTH_SHORT).show();
+                                break;
+                            case "1":
+                                String resText2 = "";
+                                if(currentstatus == "reserved") resText2 = "started";
+                                else resText2 = "ended";
+                                Toast.makeText(getContext(), "Successfully " + resText2 + " ride.", Toast.LENGTH_SHORT).show();
+                                break;
+                            case "2":
+                                Toast.makeText(getContext(), "Server error, please try again.", Toast.LENGTH_SHORT).show();
+                                break;
+                            case "3":
+                                Toast.makeText(getContext(), "The slot you are trying to scan is occupied. Please try another slot.", Toast.LENGTH_SHORT).show();
+                                break;
+                            default:
+                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) { }
+                });
+
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) { }
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
         });
     }
 
