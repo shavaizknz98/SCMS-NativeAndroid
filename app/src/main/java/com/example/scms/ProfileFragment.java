@@ -60,8 +60,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     private TextView titleTextView, currentStatusTextView, numRidesTextView, totalCostTextView, violationScoretextView, contactUsTextView, reportUserTextView;
 
-    private ImageView currentStatusImageVIew, completedRidesImageView, totalCostImageView, violationScoreImageView;
-
     private OnFragmentInteractionListener mListener;
 
     public ProfileFragment() {
@@ -111,13 +109,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         contactUsTextView = v.findViewById(R.id.emailAdmistrationTextView);
         reportUserTextView = v.findViewById(R.id.reportUserTextView);
 
-        completedRidesImageView = v.findViewById(R.id.imageCompletedRides);
-        totalCostImageView = v.findViewById(R.id.imageTotalCost);
-        violationScoreImageView = v.findViewById(R.id.imageViolationScore);
-        currentStatusImageVIew = v.findViewById(R.id.imageCurrentStatus);
-
-
-
         currentStatusTextView.setOnClickListener(this);
         contactUsTextView.setOnClickListener(this);
         reportUserTextView.setOnClickListener(this);
@@ -154,48 +145,36 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                             .setPositiveButton("Yes, cancel the reservation", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    String email = prefs.getString("useremail", "");
+                                    final String email = prefs.getString("useremail", "");
                                     final String bikeid = prefs.getString("bikereserved", "");
-                                    Call<ResponseBody> call = RetrofitClient
+
+                                    Call<ResponseBody> call0 = RetrofitClient
                                             .getRetrofitClient()
                                             .getAPI()
-                                            .cancelReservation(email, bikeid);
-                                    call.enqueue(new Callback<ResponseBody>() {
+                                            .getUserInfo(email);
+                                    call0.enqueue(new Callback<ResponseBody>() {
                                         @Override
                                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                                             String r = null;
                                             try {
                                                 r = response.body().string();
-                                            } catch (IOException e) {
-                                                Log.d("AAAAA", "onResponse: " + e.getStackTrace());
-                                            }
+                                            } catch (IOException e) {}
 
                                             JSONObject resp = null;
-                                            String status = null;
                                             try {
-                                                resp = new JSONObject(r);
-                                                status = resp.getString("status");
-                                            } catch (JSONException e) {
-                                                Log.d("AAAAA", "onResponse: " + e.getStackTrace());
-                                            }
-
-                                            switch(status) {
-                                                case "0":
-                                                    Toast.makeText(getContext(), "You did not reserve this bike!", Toast.LENGTH_SHORT).show();
-                                                    break;
-                                                case "1":
-                                                    Toast.makeText(getContext(), "Reservation cancelled successfully", Toast.LENGTH_SHORT).show();
-                                                    break;
-                                                case "2":
-                                                    Toast.makeText(getContext(), "Server error", Toast.LENGTH_SHORT).show();
-                                                    break;
-                                                default:
-                                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                                            }
+                                                resp = new JSONObject(r).getJSONObject("result");
+                                                JSONArray hist = resp.getJSONArray("history");
+                                                if(hist.length() != 0) {
+                                                    String bikeID = hist.getJSONObject(hist.length()-1).getString("bike_id");
+                                                    cancelRide(email, bikeID);
+                                                }
+                                            } catch (JSONException e) {}
                                         }
 
                                         @Override
-                                        public void onFailure(Call<ResponseBody> call, Throwable t) { }
+                                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                                        }
                                     });
                                 }
                             });
@@ -224,6 +203,51 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 break;
         }
 
+    }
+
+    void cancelRide(String email, String bikeid) {
+        Call<ResponseBody> call = RetrofitClient
+                .getRetrofitClient()
+                .getAPI()
+                .cancelReservation(email, bikeid);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                String r = null;
+                try {
+                    r = response.body().string();
+                } catch (IOException e) {
+                    Log.d("AAAAA", "onResponse: " + e.getStackTrace());
+                }
+
+                JSONObject resp = null;
+                String status = null;
+                try {
+                    resp = new JSONObject(r);
+                    status = resp.getString("status");
+                } catch (JSONException e) {
+                    Log.d("AAAAA", "onResponse: " + e.getStackTrace());
+                }
+
+                switch(status) {
+                    case "0":
+                        Toast.makeText(getContext(), "You did not reserve this bike!", Toast.LENGTH_SHORT).show();
+                        break;
+                    case "1":
+                        Toast.makeText(getContext(), "Reservation cancelled successfully", Toast.LENGTH_SHORT).show();
+                        getUserData();
+                        break;
+                    case "2":
+                        Toast.makeText(getContext(), "Server error", Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) { }
+        });
     }
 
     @Override

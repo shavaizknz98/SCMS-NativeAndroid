@@ -408,6 +408,7 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
     public void onResume() {
         super.onResume();
         mapView.onResume();
+        updateStationArrays();
         //make request again here
     }
 
