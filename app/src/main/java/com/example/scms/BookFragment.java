@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -36,6 +37,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.behavior.SwipeDismissBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -246,7 +248,7 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (scanResult != null) {
-            Log.d("AAAAA", "onActivityResult:" + scanResult);
+            Log.d("AAAAA", "onActivityResult: scanresult" + scanResult + " scanresult.getcontents:" + scanResult.getContents());
             Toast.makeText(getContext(), scanResult.getContents(), Toast.LENGTH_LONG).show();
             startStopRide(scanResult.getContents());
         } else {
@@ -427,12 +429,14 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
     }
     public void markStationsWithAvailableBikes() {
 
+        BitmapDescriptor marker = createScaledMarker();
+
         if(bikesInEBSlot !=  null){
             LatLng EB_Station= new LatLng(25.311577, 55.491686);
             MarkerOptions EB = new MarkerOptions()
                     .position(EB_Station)
                     .title("EB charging station")
-                    .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
+                    .icon(marker)
                     .draggable(false);
 
             Marker EB_marker= gmap.addMarker(EB);
@@ -444,7 +448,7 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
             MarkerOptions ESB = new MarkerOptions()
                     .position(ESB_Station)
                     .title("ESB charging station")
-                    .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
+                    .icon(marker)
                     .draggable(false);
 
             Marker ESB_marker= gmap.addMarker(ESB);
@@ -456,7 +460,7 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
             MarkerOptions MB = new MarkerOptions()
                     .position(MB_Station)
                     .title("Main Building charging station")
-                    .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
+                    .icon(marker)
                     .draggable(false);
 
             Marker MB_marker= gmap.addMarker(MB);
@@ -468,7 +472,7 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
             MarkerOptions PHY = new MarkerOptions()
                     .position(PHY_Station)
                     .title("Physics charging station")
-                    .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
+                    .icon(marker)
                     .draggable(false);
 
             Marker PHY_marker= gmap.addMarker(PHY);
@@ -480,7 +484,7 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
             MarkerOptions SBA = new MarkerOptions()
                     .position(SBA_Station)
                     .title("SBA charging station")
-                    .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
+                    .icon(marker)
                     .draggable(false);
 
             Marker SBA_marker= gmap.addMarker(SBA);
@@ -492,7 +496,7 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
             MarkerOptions SC = new MarkerOptions()
                     .position(SC_Station)
                     .title("SC charging station")
-                    .icon(generateBitmapDescriptorFromRes(getContext(), R.drawable.ic_directions_bike_blue_24dp))
+                    .icon(marker)
                     .draggable(false);
 
             Marker SC_marker= gmap.addMarker(SC);
@@ -500,6 +504,21 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
             SC_marker.setTag(SC_tag);
         }
 
+    }
+
+    BitmapDescriptor createScaledMarker() {
+        int height = 100;
+        int width = 100;
+        Drawable drawable = ContextCompat.getDrawable(getContext(), R.drawable.ic_directions_bike_blue_24dp);
+
+
+        Bitmap bitmap1 = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap1);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        Bitmap newmarker = Bitmap.createScaledBitmap(bitmap1, width, height, false);
+        BitmapDescriptor  newMarkerIcon = BitmapDescriptorFactory.fromBitmap(newmarker);
+        return newMarkerIcon;
     }
 
     @Override
@@ -567,6 +586,7 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
 
                     Toast.makeText(getContext(), r, Toast.LENGTH_SHORT).show();
                     markStationsWithAvailableBikes();
+                    Log.d("AAAAA", "onResponse: calling getuserdata from bookfragment");
                 } catch (JSONException e) {
                     Log.d("BookFragment", "onResponse: " + e.getStackTrace());
                 }
@@ -579,30 +599,6 @@ public class BookFragment extends Fragment implements OnMapReadyCallback, View.O
             }
         });
     }
-
-    public static BitmapDescriptor generateBitmapDescriptorFromRes(
-            Context context, int resId) {
-        Drawable drawable = ContextCompat.getDrawable(context, resId);
-        drawable.setBounds(
-                0,
-                0,
-                drawable.getIntrinsicWidth(),
-                drawable.getIntrinsicHeight());
-        Bitmap bitmap = Bitmap.createBitmap(
-                drawable.getIntrinsicWidth(),
-                drawable.getIntrinsicHeight(),
-                Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }
-
-    /*
-    public static BitmapDescriptor scaleBitmap() {
-        int width = 100;
-        int height = 100;
-        Bitmap b = BitmapFactory.decodeResource(, )
-    }*/
 
     /**
      * This interface must be implemented by activities that contain this

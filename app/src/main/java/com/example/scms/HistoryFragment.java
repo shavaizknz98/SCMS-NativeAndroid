@@ -1,11 +1,13 @@
 package com.example.scms;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,18 @@ import android.widget.TextView;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.gms.maps.MapView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.ResponseCache;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -40,6 +54,11 @@ public class HistoryFragment extends Fragment {
     private String[] starttimes, endtimes, startlocs, endlocs, costs, dates;
 
     private OnFragmentInteractionListener mListener;
+
+    private int lenHistory = 0;
+
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor editor;
 
     public HistoryFragment() {
         // Required empty public constructor
@@ -79,35 +98,77 @@ public class HistoryFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_history, container, false);
         emptyHistory = v.findViewById(R.id.noHistoryAnim);
         emptyHistoryTextView = v.findViewById(R.id.textViewNoHistory);
-
-        emptyHistory.setVisibility(View.GONE);
-        emptyHistoryTextView.setVisibility(View.GONE);
-
-        getHistory();
-
         listView = (ListView) v.findViewById(R.id.historyListView);
-        listView.setAdapter(new HistoryAdapter(dates, startlocs, endlocs, starttimes, endtimes, costs, getContext()));
 
+        prefs = getContext().getSharedPreferences(LoginTab.SCMS_PREFS, Context.MODE_PRIVATE);
+        editor = prefs.edit();
+
+
+        if(lenHistory == 0) {
+            listView.setVisibility(View.GONE);
+        } else {
+            emptyHistory.setVisibility(View.GONE);
+            emptyHistoryTextView.setVisibility(View.GONE);
+            getHistory();
+        }
 
         return v;
-
     }
 
     void getHistory() {
-        //todo server call for history, very small bit of code
-        startlocs = new String[6];
-        startlocs[0] = "PHY"; startlocs[1] = "PHY"; startlocs[2] = "PHY"; startlocs[3] = "PHY"; startlocs[4] = "PHY"; startlocs[5] = "PHY";
-        endlocs = new String[6];
-        endlocs[0] = "ESB"; endlocs[1] = "SBA"; endlocs[2] = "ESB"; endlocs[3] = "SBA"; endlocs[4] = "ESB"; endlocs[5] = "SBA";
-        starttimes = new String[6];
-        starttimes[0] = "03:04:24"; starttimes[1] = "01:33:03"; starttimes[2] = "01:01:05"; starttimes[3] = "04:02:55"; starttimes[4] = "10:45:43"; starttimes[5] = "04:22:51";
-        endtimes = new String[6];
-        endtimes[0] = "03:05:13"; endtimes[1] = "01:40:10"; endtimes[2] = "01:11:13"; endtimes[3] = "04:07:10"; endtimes[4] = "10:46:44"; endtimes[5] = "04:24:39";
-        costs = new String[6];
-        costs[0] = "2.40"; costs[1] = "11.75"; costs[2] = "13.25"; costs[3] = "6.00"; costs[4] = "3.50"; costs[5] = "3.30";
-        dates = new String[6];
-        dates[0] = "27/04/2020"; dates[1] = "26/04/2020"; dates[2] = "25/04/2020"; dates[3] = "24/04/2020"; dates[4] = "23/04/2020"; dates[5] = "22/04/2020";
+        String email = prefs.getString("useremail", "");
+        Call<ResponseBody> call = RetrofitClient
+                .getRetrofitClient()
+                .getAPI()
+                .getUserInfo(email);
 
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                String r = null;
+                try {
+                    r = response.body().string();
+                    Log.d("AAAAA", "onResponse: respbodystring" + r);
+                } catch (IOException e) {
+                    Log.d("AAAAA", "onResponse: " + e.getStackTrace());
+                }
+
+                JSONObject resp = null;
+                try {
+                    int totalRides;
+                    resp = new JSONObject(r);
+                    JSONObject user = resp.getJSONObject("result");
+                    JSONArray history = user.getJSONArray("history");
+
+                    totalRides = history.length();
+                    lenHistory = totalRides;
+
+                    startlocs = new String[totalRides];
+                    endlocs = new String[totalRides];
+                    dates = new String[totalRides];
+                    starttimes = new String[totalRides];
+                    endlocs = new String[totalRides];
+                    costs = new String[totalRides];
+
+                    for(int i = 0; i < totalRides; i++) {
+                        JSONObject tmp = history.getJSONObject(i);
+                        startlocs[i] = tmp.getString("fromLocation");
+                        endlocs[i] = tmp.getString("toLocation");
+                        starttimes[i] = tmp.getString("rideStartTime");
+                        endtimes[i] = tmp.getString("rideEndTime");
+                        costs[i] = tmp.getString("rideCost");
+                        dates[i] = tmp.getString("reservationDate");
+                    }
+
+                } catch (JSONException e) {
+                    Log.d("AAAAA", "onResponse: " + e.getStackTrace());
+                }
+                listView.setAdapter(new HistoryAdapter(dates, startlocs, endlocs, starttimes, endtimes, costs, getContext()));
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) { }
+        });
     }
 
     // TODO: Rename method, update argument and hook method into UI event

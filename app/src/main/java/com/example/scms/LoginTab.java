@@ -138,6 +138,7 @@ public class LoginTab extends Fragment {
                     code = 1 login successfully
                     code = 2 server error
                     code = 3 wrong password
+                    code = 4 user banned
                      */
                         int code = 4;
                         try {
@@ -159,7 +160,9 @@ public class LoginTab extends Fragment {
                         } else if (code == 3) {
                             Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_LONG).show();
                         } else if (code == 4) {
-                            Toast.makeText(getActivity(), "Please connect to the internet", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), "User is banned", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getActivity(), "Error", Toast.LENGTH_LONG).show();
                         }
 
                     }

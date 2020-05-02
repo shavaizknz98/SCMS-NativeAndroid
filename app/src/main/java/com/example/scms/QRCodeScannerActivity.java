@@ -47,14 +47,14 @@ public class QRCodeScannerActivity extends AppCompatActivity implements Decorate
 
 
         //remove flashlight if no flash
-        if(getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+        if(!getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
             toggleFlashBtn.setVisibility(View.GONE);
         }
 
         toggleFlashBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(toggleFlashBtn.getText().equals("Turn on flash")) {
+                if(toggleFlashBtn.getText().equals("Turn on flash") || toggleFlashBtn.getText().toString().toLowerCase().contains(":")) {
                     scannerView.setTorchOn();
                 } else {
                     scannerView.setTorchOff();

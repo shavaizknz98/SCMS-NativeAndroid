@@ -1,12 +1,16 @@
 package com.example.scms;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -53,7 +57,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     private JSONObject userinfoobj;
 
-    private TextView titleTextView, currentStatusTextView, numRidesTextView, totalCostTextView, violationScoretextView;
+    private TextView titleTextView, currentStatusTextView, numRidesTextView, totalCostTextView, violationScoretextView, contactUsTextView, reportUserTextView;
 
     private OnFragmentInteractionListener mListener;
 
@@ -98,11 +102,17 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         titleTextView = v.findViewById(R.id.textViewTitle);
         currentStatusTextView = v.findViewById(R.id.textViewCurrentStatusVal);
-        numRidesTextView = v.findViewById(R.id.textViewCostVal);
-        totalCostTextView = v.findViewById(R.id.textViewCompletedRidesVal);
+        numRidesTextView = v.findViewById(R.id.textViewCompletedRidesVal);
+        totalCostTextView = v.findViewById(R.id.textViewCostVal);
         violationScoretextView = v.findViewById(R.id.textViewViolationScoreVal);
+        contactUsTextView = v.findViewById(R.id.emailAdmistrationTextView);
+        reportUserTextView = v.findViewById(R.id.reportUserTextView);
 
         currentStatusTextView.setOnClickListener(this);
+        contactUsTextView.setOnClickListener(this);
+        reportUserTextView.setOnClickListener(this);
+
+        getUserData();
 
         return v;
     }
@@ -117,7 +127,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.textViewCurrentStatusVal:
-                String t = totalCostTextView.getText().toString().trim();
+                Log.d("AAAAA", "onClick: trying to cancel booking");
+                String t = currentStatusTextView.getText().toString().trim();
+                Log.d("AAAAA", "onClick: " + t);
                 if(t == "No booking") {
                     Toast.makeText(getContext(), "No bike booked!", Toast.LENGTH_SHORT).show();
                 } else if(t == "Ride in progress") {
@@ -128,6 +140,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     builder.setIcon(R.drawable.ic_warning_black_24dp);
                     builder.setMessage("Do you want to cancel your current reservation?")
                             .setCancelable(true)
+                            .setNegativeButton("No", null)
                             .setPositiveButton("Yes, cancel the reservation", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -176,46 +189,31 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                     });
                                 }
                             });
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+                    alertDialog.getButton(Dialog.BUTTON_NEGATIVE).setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));  //make a colors entry
+                    alertDialog.getButton(Dialog.BUTTON_POSITIVE).setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));
+                    alertDialog.getButton(Dialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(getContext(), R.color.colorPageBackground));
+                    alertDialog.getButton(Dialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(getContext(), R.color.colorPageBackground));
+
                 }
-        }
-    }
+            case R.id.reportUserTextView:
+                break;
 
-   /* public void tr() {
-        Call<ResponseBody> call = RetrofitClient
-                .getRetrofitClient()
-                .getAPI()
-                .signUpUser(email, phoneNumber, fullName, password);
-
-        //make post request here
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            case R.id.emailAdmistrationTextView:
+                Log.d("AAAAA", "onClick: clicked contact us");
+                Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                emailIntent.setData(Uri.parse("mailto:developer@example.com"));
                 try {
-                    String s = response.body().string();
-                    //Log.d(TAG, "onResponse: " + s);
-                    Toast.makeText(getActivity(), "onResponse: " + s, Toast.LENGTH_LONG).show();
-                    JSONObject resp = null;
-                    int code = 3;   //if resp is null then user error
-                    try {
-                        resp = new JSONObject(s);
-                        code = resp.getInt("status");
-                        Log.d("AAAAA", "onResponse: status = " + code);
-                    } catch(JSONException e) {
-                        Log.e("AAAAA", "onResponse: " + e.toString());
-                    }
-
-
-                } catch (IOException e) {
-                    Log.e("AAAAA", "onResponse: " + e.getStackTrace());
+                    startActivity(emailIntent);
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(getContext(), "No email app found!", Toast.LENGTH_LONG).show();
                 }
-            }
+                break;
+        }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) { }
-        });
     }
 
-*/
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -237,7 +235,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     public void onResume() {
         super.onResume();
         getUserData();
-        //updateData();
     }
 
     private void getUserData() {
@@ -246,13 +243,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         Call<ResponseBody> call1 = RetrofitClient
                 .getRetrofitClient()
                 .getAPI()
-                .getUserProfile(email);
+                .getUserInfo(email);
 
-        Log.d("AAAAA", "getUserData: got here0");
         call1.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.d("AAAAA", "getUserData: got here0");
                 String r = null;
                 try {
                     r = response.body().string();
@@ -265,10 +260,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 try {
                     resp = new JSONObject(r);
                     Log.d("AAAAA", "onResponse: resp " + resp);
-                    userinfoobj = resp;
+                    userinfoobj = new JSONObject(r);
                 } catch (JSONException e) {
                     Log.d("AAAAA", "onResponse: " + e.getStackTrace());
                 }
+                updateData();
             }
 
             @Override
@@ -291,7 +287,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             JSONObject user = userinfoobj.getJSONObject("result");
             name = user.getString("fullname");
             JSONArray hist = user.getJSONArray("history");
-            numRides = hist.length();
             violationscore = user.getString("violationScore");
             if(user.getString("status") != "NA") {
                 flag = 1;
@@ -302,9 +297,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 String tmpcost = item.getString("rideCost");
                 if(tmpcost != "NA") {
                     total_cost += Float.valueOf(tmpcost);
+                    numRides++; //if cost is defined then a ride was completed
                 }
                 if(flag == 1 && i == 0) {
-                    current_status = item.getString("status");
+                    current_status = item.getString("status");  //most recent ride is up top
                 }
             }
         } catch (JSONException e) {
@@ -323,7 +319,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             }
         }
 
-        numRidesTextView.setText(numRides);
+        numRidesTextView.setText(String.valueOf(numRides));
 
         totalCostTextView.setText(String.valueOf(total_cost));
 

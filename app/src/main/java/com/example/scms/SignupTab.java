@@ -4,6 +4,7 @@ import android.app.KeyguardManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.fingerprint.FingerprintManager;
 import android.net.Uri;
 import android.os.Build;
@@ -90,6 +91,8 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
 
     private Pattern emailPattern = Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
 
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
 
     public SignupTab() {
         // Required empty public constructor
@@ -147,6 +150,8 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
         phoneNumberEditText = view.findViewById(R.id.phoneNumberEditText);
         //IDEditText = view.findViewById(R.id.idEditText);
         switchMaterial = view.findViewById(R.id.switchMaterial);
+        prefs = getContext().getSharedPreferences(LoginTab.SCMS_PREFS, Context.MODE_PRIVATE);
+        editor = prefs.edit();
 
         //TODO email regex
         /*
@@ -192,7 +197,7 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
                     getActivity().finish();
                 }*/
 
-                String email, phoneNumber, fullName, password;
+                final String email, phoneNumber, fullName, password;
 
                 if(emailAddrEditText.getText().toString().isEmpty()) {
                     Toast.makeText(getActivity(), "You must enter your email!", Toast.LENGTH_LONG).show();
@@ -257,7 +262,7 @@ public class SignupTab extends Fragment implements BiometricCallback, View.OnCli
 
                             if(code == 1) {
                                 Intent toNavigationActivity = new Intent(getContext(), NavigationActivity.class);
-
+                                editor.putString("useremail", email).commit();
                                 startActivity(toNavigationActivity);
                                 getActivity().finish();
                             } else if(code == 0){

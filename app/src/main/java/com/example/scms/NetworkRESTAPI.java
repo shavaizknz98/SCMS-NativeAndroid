@@ -88,7 +88,7 @@ public interface NetworkRESTAPI {
     //get user profile
     @FormUrlEncoded
     @POST("/user/getUserInfo")
-    Call<ResponseBody> getUserProfile(
+    Call<ResponseBody> getUserInfo(
             @Field("user_email") String userID
     );
 
